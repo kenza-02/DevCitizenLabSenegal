@@ -30,8 +30,11 @@ const {
               </div>
             )}
             {amount && (
-              <div class="font-heading text-primary text-[2.6rem] font-bold dark:text-white lg:text-5xl xl:text-6xl">
-                {amount}
+              <div
+                class="counter font-heading text-primary text-[2.6rem] font-bold dark:text-white lg:text-5xl xl:text-6xl"
+                data-target={amount}
+              >
+                0
               </div>
             )}
             {title && (
@@ -44,3 +47,57 @@ const {
     }
   </div>
 </WidgetWrapper>
+
+<script>
+  function animateCounters() {
+    const counters = document.querySelectorAll('.counter');
+
+    counters.forEach(counter => {
+      const updateCount = () => {
+        const target = counter.getAttribute('data-target');
+        const count = parseInt(counter.innerText);
+
+        // Parse target value (handle K+, +, etc.)
+        let targetNum;
+        if (target.includes('K+')) {
+          targetNum = parseInt(target.replace('K+', '')) * 1000;
+        } else if (target.includes('+')) {
+          targetNum = parseInt(target.replace('+', ''));
+        } else {
+          targetNum = parseInt(target);
+        }
+
+        const increment = targetNum / 100; // Adjust speed here (100 steps)
+
+        if (count < targetNum) {
+          counter.innerText = Math.ceil(count + increment);
+          setTimeout(updateCount, 30); // Speed of counting (lower = faster)
+        } else {
+          counter.innerText = target; // Set final value
+        }
+      };
+
+      updateCount();
+    });
+  }
+
+  // Intersection Observer to trigger animation when element comes into view
+  const observerOptions = {
+    threshold: 0.5, // Trigger when 50% of the element is visible
+  };
+
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounters();
+        observer.unobserve(entry.target); // Animate only once
+      }
+    });
+  }, observerOptions);
+
+  // Start observing the stats section
+  const statsSection = document.querySelector('.flex.flex-wrap.justify-center.-m-4.text-center');
+  if (statsSection) {
+    observer.observe(statsSection);
+  }
+</script>

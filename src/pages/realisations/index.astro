@@ -1,0 +1,335 @@
+---
+// src/pages/realisations/index.astro
+import Layout from '~/layouts/PageLayout.astro';
+import Features3 from '~/components/widgets/Features3.astro';
+import Stats from '~/components/widgets/Stats.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+import { Image } from 'astro:assets';
+import RealisationsImg from '~/assets/images/realisations.jpg';
+
+const metadata = {
+  title: 'Nos Réalisations | CitizenLab Sénégal',
+  description: 'Découvrez nos projets réalisés en matière de participation citoyenne et d\'innovation sociale au Sénégal.',
+};
+
+// Données des réalisations
+const realisations = [
+  {
+    id: 'budget-participatif',
+    title: 'Plateforme de Budget Participatif',
+    category: 'Développement Web',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    description: 'Plateforme digitale permettant aux citoyens de proposer, voter et suivre des projets budgétaires locaux.',
+    client: 'Mairie de Dakar',
+    date: '2023',
+    technologies: ['React', 'Node.js', 'PostgreSQL'],
+    impact: '5000+ citoyens engagés, 120 projets proposés',
+    link: '/realisations/budget-participatif',
+  },
+  {
+    id: 'open-data-observatory',
+    title: 'Observatoire des données ouvertes',
+    category: 'Data & Visualisation',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    description: 'Portail agrégeant des données publiques sénégalaises avec outils d\'analyse et visualisation.',
+    client: 'Gouvernement du Sénégal',
+    date: '2023',
+    technologies: ['Vue.js', 'D3.js', 'Python', 'API REST'],
+    impact: '200+ jeux de données, 10K+ utilisateurs mensuels',
+    link: '/realisations/open-data-observatory',
+  },
+  {
+    id: 'civic-engagement-tool',
+    title: 'Outil d\'engagement civique',
+    category: 'Application Mobile',
+    image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    description: 'Système de suivi et notification pour les consultations publiques dans plusieurs communes.',
+    client: 'Communes du Sénégal',
+    date: '2024',
+    technologies: ['React Native', 'Firebase', 'Node.js'],
+    impact: '15 communes, 8000+ notifications envoyées',
+    link: '/realisations/civic-engagement-tool',
+  },
+  {
+    id: 'youth-bootcamp',
+    title: 'Bootcamps Innovation Jeunesse',
+    category: 'Formation & Accompagnement',
+    image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    description: 'Programme de formation intensive pour jeunes sur l\'innovation sociale et le développement d\'applications.',
+    client: 'Ministère de la Jeunesse',
+    date: '2023-2024',
+    technologies: ['Formation', 'Mentoring', 'Prototypage'],
+    impact: '150+ jeunes formés, 30 prototypes développés',
+    link: '/realisations/youth-bootcamp',
+  },
+  {
+    id: 'media-campaign',
+    title: 'Campagne Médias & Données Ouvertes',
+    category: 'Sensibilisation',
+    image: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    description: 'Formation de journalistes à l\'utilisation de données ouvertes pour une couverture plus transparente.',
+    client: 'Médias Sénégalais',
+    date: '2023',
+    technologies: ['Formation', 'Data Journalism', 'Outils Open Source'],
+    impact: '50+ journalistes formés, 20+ articles publiés',
+    link: '/realisations/media-campaign',
+  },
+  {
+    id: 'hackathon-open-data',
+    title: 'Hackathon Open Data Sénégal',
+    category: 'Événement',
+    image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    description: 'Premier hackathon sénégalais utilisant les données ouvertes pour créer des solutions citoyennes.',
+    client: 'Africtivistes',
+    date: '2024',
+    technologies: ['APIs', 'Open Data', 'Prototypage Rapide'],
+    impact: '100+ participants, 15 projets finalisés',
+    link: '/realisations/hackathon-open-data',
+  },
+];
+
+// Catégories pour le filtrage (exclure Sensibilisation et Événement)
+const categories = ['Tous', ...new Set(realisations.map(r => r.category).filter(cat => cat !== 'Sensibilisation' && cat !== 'Événement'))];
+---
+
+<Layout metadata={metadata}>
+  <!-- Hero Banner -->
+  <section class="relative h-[70vh] min-h-[500px] overflow-hidden">
+    <img
+      src={RealisationsImg.src}
+      alt="Nos Réalisations"
+      class="absolute inset-0 w-full h-full object-cover"
+    />
+    <div class="absolute inset-0 bg-gradient-to-b from-green-600/30 via-green-600/20 to-green-600/40" />
+
+    <div class="relative h-full flex items-center justify-center text-center px-4">
+      <div class="max-w-4xl mx-auto text-white">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+          Nos Réalisations
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-200 leading-relaxed">
+          Découvrez les projets qui transforment la participation citoyenne au Sénégal. De la conception à la mise en œuvre, chaque réalisation reflète notre engagement pour l'innovation sociale.
+        </p>
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="#projets"
+            class="px-8 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+          >
+            Voir nos projets
+          </a>
+          <a
+            href="/contact"
+            class="px-8 py-3 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-colors"
+          >
+            Nous contacter
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <Stats
+    title="Notre impact en chiffres"
+    stats={[
+      { title: 'Projets réalisés', amount: '25+' },
+      { title: 'Citoyens engagés', amount: '15K+' },
+      { title: 'Partenaires', amount: '30+' },
+    ]}
+  />
+
+  <!-- Projects Grid -->
+  <section id="projets" class="px-4 py-16 sm:px-6 lg:px-8 lg:py-20 mx-auto max-w-7xl">
+    <div class="mb-12 text-center">
+      <h2 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter mb-4 font-heading">
+        Projets marquants
+      </h2>
+      <p class="text-xl text-muted dark:text-slate-400 max-w-3xl mx-auto">
+        Une sélection de nos réalisations les plus impactantes
+      </p>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="flex flex-wrap justify-center gap-3 mb-12">
+      {categories.map((category) => (
+        <button
+          class="filter-btn px-6 py-2 rounded-full border-2 border-primary transition-all hover:bg-primary hover:text-white"
+          data-category={category}
+        >
+          {category}
+        </button>
+      ))}
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {realisations.map((projet) => (
+        <article
+          class="project-card group relative overflow-hidden rounded-lg bg-white dark:bg-slate-900 shadow-lg transition-all hover:shadow-2xl"
+          data-category={projet.category}
+        >
+          <!-- Image -->
+          <div class="relative h-64 overflow-hidden">
+            <img
+              src={projet.image}
+              alt={projet.title}
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            <!-- Category Badge -->
+            <span class="absolute top-4 left-4 px-3 py-1 bg-primary text-white text-sm font-semibold rounded-full">
+              {projet.category}
+            </span>
+          </div>
+
+          <!-- Content -->
+          <div class="p-6">
+            <h3 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+              {projet.title}
+            </h3>
+            
+            <p class="text-muted dark:text-slate-400 mb-4 line-clamp-2">
+              {projet.description}
+            </p>
+
+            <!-- Meta Info -->
+            <div class="space-y-2 mb-4 text-sm">
+              <div class="flex items-center text-gray-600 dark:text-gray-400">
+                <span class="font-semibold mr-2">Client:</span>
+                <span>{projet.client}</span>
+              </div>
+              <div class="flex items-center text-gray-600 dark:text-gray-400">
+                <span class="font-semibold mr-2">Date:</span>
+                <span>{projet.date}</span>
+              </div>
+              <div class="flex items-center text-gray-600 dark:text-gray-400">
+                <span class="font-semibold mr-2">Impact:</span>
+                <span>{projet.impact}</span>
+              </div>
+            </div>
+
+            <!-- Technologies -->
+            <div class="flex flex-wrap gap-2 mb-4">
+              {projet.technologies.map((tech) => (
+                <span class="px-2 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 text-xs rounded">
+                  {tech}
+                </span>
+              ))}
+            </div>
+
+            <!-- CTA -->
+            <a
+              href={projet.link}
+              class="inline-flex items-center text-primary font-semibold hover:underline"
+            >
+              Voir le projet
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- Testimonials or Process Section -->
+  <Features3
+    title="Notre processus de réalisation"
+    subtitle="Une approche éprouvée pour des projets réussis"
+    columns={4}
+    items={[
+      {
+        title: 'Découverte',
+        description: 'Analyse des besoins et co-conception avec les parties prenantes',
+        icon: 'tabler:search',
+      },
+      {
+        title: 'Développement',
+        description: 'Création de solutions adaptées avec des technologies modernes',
+        icon: 'tabler:code',
+      },
+      {
+        title: 'Déploiement',
+        description: 'Mise en production et formation des utilisateurs',
+        icon: 'tabler:rocket',
+      },
+      {
+        title: 'Suivi',
+        description: 'Accompagnement et amélioration continue',
+        icon: 'tabler:chart-line',
+      },
+    ]}
+  />
+
+  <!-- Call to Action -->
+  <CallToAction
+    title="Un projet en tête ?"
+    subtitle="Discutons de comment nous pouvons transformer votre vision en réalité digitale"
+    actions={[
+      {
+        variant: 'primary',
+        text: 'Démarrer un projet',
+        href: '/contact',
+      },
+      {
+        text: 'Voir nos services',
+        href: '/services',
+      },
+    ]}
+  />
+</Layout>
+
+<script>
+  // Filter functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const projectCards = document.querySelectorAll('.project-card');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const category = btn.getAttribute('data-category');
+
+        // Update active button
+        filterBtns.forEach(b => b.classList.remove('bg-primary', 'text-white'));
+        btn.classList.add('bg-primary', 'text-white');
+
+        // Filter projects
+        projectCards.forEach(card => {
+          const cardCategory = card.getAttribute('data-category');
+          if (category === 'Tous' || cardCategory === category) {
+            card.style.display = 'block';
+            card.style.animation = 'fadeIn 0.5s ease-in';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Set "Tous" as active by default
+    filterBtns[0]?.classList.add('bg-primary', 'text-white');
+  });
+</script>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
