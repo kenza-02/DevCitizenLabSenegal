@@ -7,9 +7,10 @@ import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
 import mdx from "@astrojs/mdx";
 import partytown from "@astrojs/partytown";
-import compress from "astro-compress";
+
 import icon from "astro-icon";
 import tasks from "./src/utils/tasks";
+import vercel from "@astrojs/vercel";
 
 import { readingTimeRemarkPlugin } from "./src/utils/frontmatter.mjs";
 
@@ -30,9 +31,9 @@ const whenExternalScripts = (items = []) =>
 export default defineConfig({
   site: SITE.site,
   base: SITE.base,
-  trailingSlash: SITE.trailingSlash ? "always" : "never",
+  trailingSlash: "ignore",
 
-  output: "static",
+  output: "server", // Permet de mélanger génération statique et rendu côté serveur
 
   integrations: [
     tailwind({
@@ -55,26 +56,10 @@ export default defineConfig({
       })
     ),
     tasks(),
-    compress({
-      CSS: true,
-      HTML: {
-        removeAttributeQuotes: false,
-        removeComments: true,
-        removeRedundantAttributes: true,
-        removeScriptTypeAttributes: true,
-        removeStyleLinkTypeAttributes: true,
-        useShortDoctype: true,
-      },
-      Image: {
-        quality: 80,
-        webp: true,
-        avif: true,
-      },
-      JavaScript: true,
-      SVG: true,
-      Logger: 1,
-    }),
     react(),
+    vercel({
+      webAnalytics: { enabled: true }
+    }),
   ],
 
   markdown: {

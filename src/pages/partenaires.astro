@@ -94,7 +94,7 @@ const partners = [
     isBeforeContent={true}
     classes={{
         items: {
-        panel: 'border border-gray-150 dark:border-gray-400 shadow-xl rounded-xl p-9',  // Bordure et ombre sur chaque item
+        panel: 'border border-green-150 dark:border-green-400 shadow-xl rounded-xl p-9 min-h-[200px] flex flex-col',  // Bordure et ombre sur chaque item, hauteur minimale et flex pour dimensions égales
         },
     }}
     items={[
@@ -129,7 +129,7 @@ const partners = [
       </div>
 
       <!-- Partners Grid -->
-      <div class=*"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-3 gap-8">
         {partners.map((partner, index) => (
           <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-xl text-center hover:shadow-xl transition-shadow duration-400" style="border: 1px solid #b1f4a0ff;">
             <a href={partner.href} target="_blank" class="block mb-4 transition-transform hover:scale-105">
@@ -153,11 +153,11 @@ const partners = [
   <Features3
     title="Pourquoi devenir Partenaire avec CitizenLab Sénégal ?"
     subtitle="Rejoignez un écosystème d'organisations engagées pour un impact collectif plus fort"
-    columns={2}
+    columns={4}
     isAfterContent={true}
     classes={{
         items: {
-        panel: 'border border-green-300 dark:border-green-600 shadow-xl rounded-xl p-9',  // Bordure et ombre sur chaque item
+        panel: 'border border-green-300 dark:border-green-600 shadow-xl rounded-xl p-9 min-h-[200px] flex flex-col',  // Bordure et ombre sur chaque item
         },
     }}
     
@@ -188,22 +188,24 @@ const partners = [
   
 
   <!-- Call to Action -->
-  <CallToAction
-    title="Prêt à nous rejoindre ?"
-    subtitle="Que vous soyez une organisation, une institution ou un particulier, votre contribution compte dans notre mission commune."
-    actions={[
-      {
-        text: 'Nous Contacter',
-        href: '/contact',
-        variant: 'primary',
-      },
-      {
-        text: 'En Savoir Plus',
-        href: '/a-propos"',
-        variant: 'secondary',
-      },
-    ]}
-  />
+    <CallToAction
+      
+      title="Prêt à nous rejoindre ?"
+      subtitle="Que vous soyez une organisation, une institution ou un particulier, votre contribution compte dans notre mission commune."
+      actions={[
+        {
+          text: 'Nous Contacter',
+          href: '/contact',
+          variant: 'primary',
+        },
+        {
+          text: 'En Savoir Plus',
+          href: '/a-propos"',
+          variant: 'secondary',
+        },
+      ]}
+    />
+  
 </Layout>
 
 <script>

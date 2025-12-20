@@ -1,67 +1,75 @@
 ---
 import Layout from "~/layouts/PageLayout.astro";
-import { getCollection, getEntry } from "astro:content";
+import { getActualiteBySlug, getActualites } from "~/utils/api";
 import { GoArrowUpRight } from "react-icons/go";
-
-export async function getStaticPaths() {
-  const articles = await getCollection("news");
-
-  return articles.map((article) => ({
-    params: { slug: article.slug },
-  }));
-}
 
 const { slug } = Astro.params;
 
-const autresArticles = await getCollection("news");
+// Extraire le vrai slug depuis l'URL WordPress (format: YYYY/MM/DD/slug/)
+const slugParts = Array.isArray(slug) ? slug : [slug];
+const realSlug = slugParts[slugParts.length - 1]; // Prendre le dernier élément (le slug réel)
 
-// charge l’article depuis la collection "news"
-const article = await getEntry("news", slug);
+// Récupérer l'article depuis l'API en utilisant le slug réel
+const article = await getActualiteBySlug(realSlug);
 
 if (!article) {
   throw new Error("Article introuvable");
 }
 
-// Rendu du contenu markdown en html
-const {Content} = await article.render();
+// Récupérer d'autres articles pour la section "Autres articles"
+const autresArticles = await getActualites();
+
+// Transformer les données des autres articles
+const autresArticlesTransformes = autresArticles
+  .filter((art) => art.uri !== article.uri) // Filtrer l'article actuel
+  .slice(0, 3)
+  .map((art) => ({
+    slug: art.uri.replace('/', ''),
+    data: {
+      title: art.title,
+      date: new Date(art.date).toLocaleDateString('fr-FR'),
+      category: art.categories?.nodes?.[0]?.name || 'Actualités',
+      image: art.featuredImage?.node?.mediaItemUrl || '/images/news.jpg',
+    },
+  }));
 ---
 
 <Layout
-  metadata={{ title: article.data.title }}
+  metadata={{ title: article.title || 'Article' }}
 >
   <main class="mx-auto py-16 bg-[#fcfcfc]">
     <div class="max-w-4xl mx-auto text-center mb-12 space-y-6">
       <span
         class="text-base font-semibold text-green-900 mb-2 border border-green-900 px-4 py-3 rounded-full"
-        >{article.data.category}</span
+        >{article.categories?.nodes?.[0]?.name || 'Actualités'}</span
       >
       <h2 class="text-5xl font-bold mb-6 text-green-900">
-        {article.data.title}
+        {article.title}
       </h2>
       <p class="text-sm text-center text-green-900 mb-8">
         • Publié le {
-          new Date(article.data.date).toLocaleDateString("fr-FR", {
+          new Date(article.date).toLocaleDateString("fr-FR", {
             year: "numeric",
             month: "long",
             day: "numeric",
           })
-        } 
+        }
       </p>
     </div>
 
     <div class="max-w-4xl mx-auto mb-12">
     {
-      article.data.image && (
+      article.featuredImage?.node?.sourceUrl && (
         <div class="mb-8">
           <img
-            src={article.data.image}
-            alt={article.data.title}
+            src={article.featuredImage.node.sourceUrl}
+            alt={article.featuredImage.node.altText || article.title}
             class="w-full h-auto rounded-lg"
           />
         </div>
       )
     }
-    <!-- Contenu de l'article formaté -->
+    <!-- Contenu de l'article -->
       <article class="prose prose-lg prose-green max-w-none
         prose-headings:text-green-900 prose-headings:font-bold
         prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
@@ -69,9 +77,7 @@ const {Content} = await article.render();
         prose-ul:my-6 prose-ul:space-y-3
         prose-li:text-gray-700
         prose-strong:text-green-900 prose-strong:font-semibold
-      ">
-        <Content />
-      </article>
+      " set:html={article.content} />
     </div>
   </main>
     <div class="mx-auto bg-[#f0f2ee] py-12 px-10">
@@ -79,7 +85,7 @@ const {Content} = await article.render();
         <!-- Grille de cards -->
         <div class="py-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="cards-grid">
-            {autresArticles.map((article) => (
+            {autresArticlesTransformes.map((article) => (
             <a href={`/news/${article.slug}`} class="block group">
                 <article
                 class="news-card bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer"

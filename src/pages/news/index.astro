@@ -4,17 +4,29 @@ import Layout from "~/layouts/PageLayout.astro";
 import { Image } from "astro:assets";
 import NewsImg from "~/assets/images/news.jpg";
 import { GoArrowUpRight } from "react-icons/go";
-import {getCollection} from "astro:content";
+import { getActualites } from "~/utils/api";
 
 const metadata = {
   title: "Actualités et medias",
 };
 
-const articles = await getCollection("news");
+const articles = await getActualites();
+
+// Transformer les données de l'API pour correspondre à la structure attendue
+const transformedArticles = articles.map((article) => ({
+  slug: article.uri.replace('/', ''), // Convertir l'URI en slug
+  data: {
+    title: article.title,
+    date: new Date(article.date).toLocaleDateString('fr-FR'),
+    category: article.categories?.nodes?.[0]?.name || 'Actualités',
+    image: article.featuredImage?.node?.mediaItemUrl || '/images/news.jpg',
+  },
+  excerpt: article.excerpt,
+}));
 
 const categories = [
   "Toutes",
-  ...new Set(articles.map((article) => article.data.category)),
+  ...new Set(transformedArticles.map((article) => article.data.category)),
 ];
 
 ---
@@ -55,7 +67,7 @@ const categories = [
     <!-- Grille de cards -->
     <div class="py-12">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="cards-grid">
-        {articles.map((article) => (
+        {transformedArticles.map((article) => (
   <a
     href={`/news/${article.slug}`}
     class="block"

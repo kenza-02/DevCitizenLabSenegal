@@ -206,6 +206,165 @@ export async function getNodeByURI(uri) {
     return null;
   }
 }
+export async function getActualites() {
+  const apiUrl =
+    import.meta.env.PUBLIC_WORDPRESS_API_URL ||
+    'https://citizenlab.africtivistes.org/senegal/graphql';
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `
+          {
+            posts(
+              first: 20
+              where: {
+                categoryName: "actualites"
+              }
+            ) {
+              nodes {
+                date
+                uri
+                title
+                excerpt
+                commentCount
+                categories {
+                  nodes {
+                    name
+                    uri
+                  }
+                }
+                featuredImage {
+                  node {
+                    mediaItemUrl
+                    altText
+                  }
+                }
+              }
+            }
+          }
+        `,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const { data } = await response.json();
+    return data?.posts?.nodes || [];
+  } catch (error) {
+    console.error('Error fetching latest posts:', error.message);
+    return [];
+  }
+}
+
+export async function getActualiteBySlug(slug) {
+  const apiUrl =
+    import.meta.env.PUBLIC_WORDPRESS_API_URL ||
+    'https://citizenlab.africtivistes.org/senegal/graphql';
+
+  console.log('getActualiteBySlug - Slug recherché:', slug);
+  console.log('getActualiteBySlug - API URL:', apiUrl);
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const query = `
+      query GetActualiteBySlug($slug: ID!) {
+        post(id: $slug, idType: SLUG) {
+          id
+          date
+          modified
+          uri
+          title
+          content
+          excerpt
+          commentCount
+          categories {
+            nodes {
+              name
+              uri
+              slug
+            }
+          }
+          author {
+            node {
+              name
+              description
+              avatar {
+                url
+              }
+            }
+          }
+          featuredImage {
+            node {
+              mediaItemUrl
+              altText
+              srcSet
+              mediaDetails {
+                height
+                width
+              }
+            }
+          }
+          tags {
+            nodes {
+              name
+              slug
+            }
+          }
+        }
+      }
+    `;
+
+    console.log('getActualiteBySlug - Requête GraphQL:', query);
+    console.log('getActualiteBySlug - Variables:', { slug });
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        variables: { slug }
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    console.log('getActualiteBySlug - Statut HTTP:', response.status);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('getActualiteBySlug - Résultat complet:', result);
+
+    const post = result?.data?.post;
+    console.log('getActualiteBySlug - Article trouvé:', post ? 'Oui' : 'Non');
+
+    if (post) {
+      console.log('getActualiteBySlug - Titre:', post.title);
+      console.log('getActualiteBySlug - URI:', post.uri);
+    }
+
+    return post || null;
+  } catch (error) {
+    console.error(`Error fetching actualite ${slug}:`, error.message);
+    return null;
+  }
+}
 export async function getAllUris() {
   try {
     const apiUrl =
