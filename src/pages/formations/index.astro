@@ -1,103 +1,191 @@
 ---
-// Données des bootcamps et ateliers
-const bootcamps = [
-  {
-    id: 1,
-    title: "Bootcamp Civic Tech",
-    category: "Formation intensive",
-    duration: "5 jours",
-    level: "Débutant à Intermédiaire",
-    participants: "25 places",
-    date: "15-19 Janvier 2025",
-    image: "/src/assets/images/news1.jpg",
-    description: "Apprenez à créer des solutions numériques pour résoudre des problèmes citoyens. Formation pratique avec projets réels.",
-    highlights: [
-      "Développement d'applications citoyennes",
-      "Design thinking & idéation",
-      "Pitch et présentation de projet",
-      "Mentorat par des experts"
-    ],
-    status: "Inscriptions ouvertes",
-    price: "Gratuit"
-  },
-  {
-    id: 2,
-    title: "Atelier Data & Transparence",
-    category: "Atelier pratique",
-    duration: "2 jours",
-    level: "Intermédiaire",
-    participants: "15 places",
-    date: "8-9 Février 2025",
-    image: "/src/assets/images/news1.jpg",
-    description: "Maîtrisez la visualisation de données publiques et créez des dashboards interactifs pour plus de transparence.",
-    highlights: [
-      "Collecte et nettoyage de données",
-      "Création de visualisations",
-      "Outils open source",
-      "Projet de groupe"
-    ],
-    status: "Places limitées",
-    price: "5000 FCFA"
-  },
-  {
-    id: 3,
-    title: "Bootcamp Innovation Sociale",
-    category: "Formation intensive",
-    duration: "7 jours",
-    level: "Tous niveaux",
-    participants: "30 places",
-    date: "1-7 Mars 2025",
-    image: "/src/assets/images/news1.jpg",
-    description: "Transformez vos idées en projets d'impact social. Accompagnement complet de l'idée au prototype fonctionnel.",
-    highlights: [
-      "Méthodologie agile",
-      "Modèle économique viable",
-      "Prototypage rapide",
-      "Networking avec partenaires"
-    ],
-    status: "Bientôt disponible",
-    price: "Gratuit"
-  },
-  {
-    id: 4,
-    title: "Atelier Communication Digitale",
-    category: "Atelier pratique",
-    duration: "1 jour",
-    level: "Débutant",
-    participants: "20 places",
-    date: "22 Février 2025",
-    image: "/src/assets/images/news2.jpg",
-    description: "Apprenez à communiquer efficacement sur vos initiatives citoyennes via les réseaux sociaux et plateformes numériques.",
-    highlights: [
-      "Stratégie de contenu",
-      "Réseaux sociaux",
-      "Storytelling d'impact",
-      "Outils gratuits"
-    ],
-    status: "Inscriptions ouvertes",
-    price: "3000 FCFA"
-  }
-];
+import { getAllFormations } from "~/utils/api.js";
+import Layout from "~/layouts/PageLayout.astro";
+import Banner from "~/components/widgets/Banner.astro"; 
+import {Image} from "astro:assets";
+import bootcamp_hero from '~/assets/images/bootcamp-atelier-bg.jpg';
 
-// Fonction pour déterminer la couleur du badge selon le statut
+const wpFormations = await getAllFormations();
+
+console.log("wpFormations", wpFormations);
+
+const metadata = {
+  title: "Formations",
+};
+
+const formations = wpFormations.map((post: any) => ({
+  slug: post.slug,
+  image: post.featuredImage?.node?.mediaItemUrl ?? null,
+  nom: post.formation?.nom ?? "",
+  description: post.formation?.description ?? "",
+  lieu: post.formation?.lieu ?? "",
+  date: post.formation?.date
+    ? new Date(post.formation.date).toLocaleDateString("fr-FR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "",
+  formateur: post.formation?.formateur ?? "",
+  lien: post.formation?.lien?.url ?? null, 
+  prix: post.formation?.prix ?? "",
+  status: Array.isArray(post.formation?.statut) 
+    ? post.formation.statut[0] 
+    : post.formation?.statut ?? "",
+}));
+
+
+console.log(formations);
+
 function getStatusColor(status: string) {
   switch(status) {
     case "Inscriptions ouvertes":
       return "bg-green-100 text-green-800 border-green-300";
-    case "Places limitées":
+    case "Complet":
       return "bg-orange-100 text-orange-800 border-orange-300";
-    case "Bientôt disponible":
-      return "bg-blue-100 text-blue-800 border-blue-300";
+    case "Terminée":
+      return "bg-red-100 text-red-800 border-red-300";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-300";
+      return "bg-blue-100 text-blue-800 border-blue-300";
   }
 }
+
 ---
 
+<Layout metadata={metadata}>  
+<Banner
+    title="Nos Formations"
+    subtitle="Programmes de formation professionnelle pour renforcer vos capacités"
+  >
+    <Image
+      src={bootcamp_hero}
+      alt="Formations"
+      class="w-full h-full object-cover absolute inset-0 border-0 z-0 scale-110 transition-transform duration-700"
+    />
+  </Banner>  
 <section class="py-20 bg-gradient-to-b from-white to-green-50">
-  <div class="text-red-500">
-    xwucqbcqcniqniciqnci
-    
+  <div class="max-w-7xl mx-auto px-6">
+    <!-- Header -->
+    <div class="text-center mb-16">
+      <span class="inline-block px-5 py-2 text-center bg-green-100 text-green-800 rounded-full text-sm font-bold mb-4">
+        📚 Développez vos compétences
+      </span>
+      <h1 class="text-4xl md:text-5xl font-bold text-center text-green-900 mb-4">
+        Nos Formations
+      </h1>
+      <p class="text-xl text-gray-600 text-center max-w-3xl mx-auto">
+        Programmes de formation professionnelle pour renforcer vos capacités
+      </p>
+    </div>
 
+    <!-- Empty State -->
+    {formations.length === 0 && (
+      <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto mb-4 text-gray-300">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <p class="text-lg text-gray-500">Aucune formation disponible pour le moment.</p>
+      </div>
+    )}
+
+    <!-- Formations Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {formations.map((formation: any) => (
+  <article class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 group">
+    
+    <!-- Image -->
+    <div class="relative h-64 overflow-hidden">
+      <img 
+        src={formation.image} 
+        alt={formation.nom}
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+    
+      <div class="absolute top-4 left-4 flex flex-wrap gap-2">
+                {formation.status && (
+  <span
+    class={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm border
+      ${getStatusColor(formation.status)}`}
+  >
+    {formation.status}
+  </span>
+)}
+              </div>
+
+              <!-- Prix -->
+              {formation.prix && (
+              <div class="absolute bottom-4 left-4 px-4 py-2 bg-green-700/90 backdrop-blur-sm rounded-full text-white font-bold">
+                {formation.prix}
+              </div>
+              )}
+
+    </div>
+
+    <!-- Contenu -->
+    <div class="p-6">
+      <h3 class="text-2xl font-bold text-green-900 mb-2">
+        {formation.nom}
+      </h3>
+
+      <p class="text-gray-600 text-sm line-clamp-2 mb-4">
+        {formation.description}
+      </p>
+
+      <!-- Infos clés -->
+      <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-5">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span>{formation.date}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span>{formation.lieu}</span>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="flex gap-3">
+  {formation.status === "Inscriptions ouvertes" && formation.lien && (
+    <a 
+      href={formation.lien}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex-1 text-center px-5 py-3 bg-green-700 hover:bg-green-800 text-white font-bold rounded-lg transition-colors shadow-md"
+    >
+      S'inscrire
+    </a>
+  )}
+
+  <a 
+    href={`/formations/${formation.slug}`}
+    class={`px-5 py-3 text-center bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition-colors
+      ${
+        formation.status !== "Inscriptions Ouvertes" || !formation.lien
+          ? "flex-1"
+          : ""
+      }
+    `}
+  >
+    Détails
+  </a>
+</div>
+
+    </div>
+  </article>
+))}
+
+    </div>
   </div>
 </section>
+</Layout>

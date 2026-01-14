@@ -722,8 +722,8 @@ export function extractAudioUrl(postContent) {
 export async function getAllActualites() {
   const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
   const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       query: `
         query GetAllActualites {
@@ -752,9 +752,60 @@ export async function getAllActualites() {
             }
           }
         }
-      `
-    })
+      `,
+    }),
   });
   const { data } = await response.json();
   return data?.posts?.nodes ?? [];
+}
+
+export async function getAllFormations() {
+  const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
+
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
+        query GetAllFormations {
+          posts(
+            where: { categoryName: "Formations", status: PUBLISH }
+            first: 100
+          ) {
+            nodes {
+              slug
+              formation {
+                nom
+                description
+                lieu
+                date
+                prix
+                statut
+                duree
+                formateur
+                profession
+                places
+                lien {
+                  url
+                  title
+                  target
+                }
+              }
+              featuredImage {
+                node {
+                  mediaItemUrl
+                  altText
+                }
+              }    
+            }
+          }
+        }
+      `,
+    }),
+  });
+
+  const json = await response.json();
+  console.log("GRAPHQL:", json);
+
+  return json?.data?.posts?.nodes ?? [];
 }
