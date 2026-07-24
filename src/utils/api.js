@@ -704,6 +704,62 @@ export async function getLatestActualites(limit = 3) {
   const { data } = await response.json();
   return data?.posts?.nodes ?? [];
 }
+export async function getLatestProjets(limit = 3) {
+  const apiUrl =
+    import.meta.env.PUBLIC_WORDPRESS_API_URL ||
+    "https://citizenlab.africtivistes.org/senegal/graphql";
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `
+          query GetLatestProjets($limit: Int!) {
+            posts(
+              first: $limit
+              where: {
+                categoryName: "Projets"
+                orderby: { field: DATE, order: DESC }
+              }
+            ) {
+              nodes {
+                title
+                excerpt
+                uri
+                slug
+                featuredImage {
+                  node {
+                    mediaItemUrl
+                    altText
+                  }
+                }
+              }
+            }
+          }
+        `,
+        variables: { limit },
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const { data } = await response.json();
+    return data?.posts?.nodes ?? [];
+  } catch (error) {
+    console.error("Error fetching projets:", error.message);
+    return [];
+  }
+}
+
 export function extractAudioUrl(postContent) {
   if (!postContent) return "";
 
