@@ -50,7 +50,7 @@ export async function navQuery() {
     }
 
     const menuItems = data.menuItems.nodes.filter(
-      (node) => node.parentId === null
+      (node) => node.parentId === null,
     );
     console.log("Filtered Menu Items:", menuItems);
     return menuItems;
@@ -272,7 +272,7 @@ export async function getAllUris() {
       } catch (error) {
         console.error(
           `Error fetching URIs (attempt ${attempt + 1}/${maxAttempts}):`,
-          error.message
+          error.message,
         );
         attempt++;
 
@@ -512,7 +512,7 @@ export async function getAllMembers() {
 
   if (!apiUrl) {
     console.warn(
-      "PUBLIC_WORDPRESS_API_URL is not defined, returning empty array"
+      "PUBLIC_WORDPRESS_API_URL is not defined, returning empty array",
     );
     return [];
   }
@@ -704,6 +704,62 @@ export async function getLatestActualites(limit = 3) {
   const { data } = await response.json();
   return data?.posts?.nodes ?? [];
 }
+export async function getLatestProjets(limit = 3) {
+  const apiUrl =
+    import.meta.env.PUBLIC_WORDPRESS_API_URL ||
+    "https://citizenlab.africtivistes.org/senegal/graphql";
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `
+          query GetLatestProjets($limit: Int!) {
+            posts(
+              first: $limit
+              where: {
+                categoryName: "Projets"
+                orderby: { field: DATE, order: DESC }
+              }
+            ) {
+              nodes {
+                title
+                excerpt
+                uri
+                slug
+                featuredImage {
+                  node {
+                    mediaItemUrl
+                    altText
+                  }
+                }
+              }
+            }
+          }
+        `,
+        variables: { limit },
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const { data } = await response.json();
+    return data?.posts?.nodes ?? [];
+  } catch (error) {
+    console.error("Error fetching projets:", error.message);
+    return [];
+  }
+}
+
 export function extractAudioUrl(postContent) {
   if (!postContent) return "";
 
@@ -713,7 +769,7 @@ export function extractAudioUrl(postContent) {
 
   // Si le thème utilise wp-block-audio
   const wpAudioMatch = postContent.match(
-    /<figure class="wp-block-audio"[\s\S]*?<\/figure>/
+    /<figure class="wp-block-audio"[\s\S]*?<\/figure>/,
   );
   if (wpAudioMatch) return wpAudioMatch[0];
 
@@ -722,8 +778,8 @@ export function extractAudioUrl(postContent) {
 export async function getAllActualites() {
   const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
   const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       query: `
         query GetAllActualites {
@@ -752,9 +808,170 @@ export async function getAllActualites() {
             }
           }
         }
-      `
-    })
+      `,
+    }),
   });
   const { data } = await response.json();
   return data?.posts?.nodes ?? [];
+}
+export async function getAllProjets() {
+  const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
+        query GetAllProjets {
+          posts(
+            where: { categoryName: "projets" }
+            first: 100
+          ) {
+            nodes {
+              title
+              excerpt
+              content
+              slug
+              uri
+              date
+              categories {
+                nodes {
+                  name
+                  slug
+                }
+              }
+              featuredImage {
+                node {
+                  mediaItemUrl
+                  altText
+                }
+              }
+            }
+          }
+        }
+      `,
+    }),
+  });
+  const { data } = await response.json();
+  return data?.posts?.nodes ?? [];
+}
+export async function getAllRealisations() {
+  const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
+
+  if (!apiUrl) {
+    console.warn("PUBLIC_WORDPRESS_API_URL is not defined");
+    return [];
+  }
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `
+          query GetRealisations {
+            posts(
+              where: { categoryName: "Realisations" }
+              first: 50
+            ) {
+              nodes {
+                id
+                title
+                content
+                excerpt
+                date
+                slug
+                featuredImage {
+                  node {
+                    mediaItemUrl
+                    altText
+                  }
+                }
+              }
+            }
+          }
+        `,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      return [];
+    }
+
+    return result.data?.posts?.nodes || [];
+  } catch (error) {
+    console.error("Error fetching Realisations:", error);
+    return [];
+  }
+}
+export async function getRealisationBySlug(slug) {
+  const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
+
+  if (!apiUrl) {
+    console.warn("PUBLIC_WORDPRESS_API_URL is not defined");
+    return null;
+  }
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `
+          query GetRealisationBySlug($slug: ID!) {
+            post(id: $slug, idType: SLUG) {
+              id
+              title
+              excerpt
+              content
+              date
+              slug
+              uri
+              categories {
+                nodes {
+                  name
+                  slug
+                }
+              }
+              featuredImage {
+                node {
+                  mediaItemUrl
+                  altText
+                  srcSet
+                  sourceUrl
+                  mediaDetails {
+                    height
+                    width
+                  }
+                }
+              }
+            }
+          }
+        `,
+        variables: { slug },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      return null;
+    }
+
+    return result.data?.post || null;
+  } catch (error) {
+    console.error("Error fetching Realisation:", error);
+    return null;
+  }
 }

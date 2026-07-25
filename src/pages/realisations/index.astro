@@ -3,17 +3,132 @@ import Layout from '~/layouts/PageLayout.astro';
 import Features3 from '~/components/widgets/Features3.astro';
 import Stats from '~/components/widgets/Stats.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
-import { Image } from 'astro:assets';
 import RealisationsImg from '~/assets/images/realisations.jpg';
-import { projetsData } from './data';
+import { getAllRealisations } from '~/utils/api';
+
+// Définir les interfaces de type pour les données
+interface RealisationMeta {
+  client?: string;
+  periode?: string;
+  technologies?: string[];
+  impact?: string;
+}
+
+interface Category {
+  name: string;
+  slug: string;
+}
+
+interface FeaturedImage {
+  node: {
+    mediaItemUrl: string;
+    altText: string;
+    srcSet?: string;
+    sourceUrl?: string;
+    mediaDetails?: {
+      height: number;
+      width: number;
+    };
+  };
+}
+
+interface Realisation {
+  id: string;
+  title: string;
+  excerpt?: string;
+  content?: string;
+  date?: string;
+  slug?: string;
+  uri?: string;
+  categories?: {
+    nodes: Category[];
+  };
+  featuredImage?: FeaturedImage;
+  realisationsMeta?: RealisationMeta;
+}
+
+interface Project {
+  title: string;
+  category: string;
+  client: string;
+  date: string;
+  heroImage: string;
+  description: string;
+  challenge: string;
+  solution: string;
+  technologies: string[];
+  features: Array<{ title: string; description: string; icon: string }>;
+  results: string[];
+  testimonial: null | {
+    quote: string;
+    author: string;
+    role: string;
+    image: string;
+  };
+  gallery: string[];
+}
 
 const metadata = {
   title: 'Nos Réalisations | CitizenLab Sénégal',
   description: 'Découvrez nos projets réalisés en matière de participation citoyenne et d\'innovation sociale au Sénégal.',
 };
 
-// Catégories pour le filtrage
-const categories = ['Tous', ...new Set(Object.values(projetsData).map(p => p.category).filter(cat => cat !== 'Sensibilisation' && cat !== 'Événement'))];
+// Récupérer les réalisations depuis l'API
+const realisations: Realisation[] = await getAllRealisations();
+
+
+// Fonction helper pour nettoyer l'excerpt HTML
+function cleanExcerpt(excerpt: string): string {
+  return excerpt.replace(/<[^>]*>/g, '').trim();
+}
+
+// Fonction pour obtenir une image par défaut
+function getDefaultImage(): string {
+  return '/assets/images/default.png';
+}
+
+// Transformer les données de l'API pour correspondre à la structure attendue
+const projetsData: Record<string, Project> = realisations.reduce((acc: Record<string, Project>, realisation: Realisation, index: number) => {
+  const projectId = realisation.slug || `realisation-${index}`;
+  
+  acc[projectId] = {
+    title: realisation.title,
+    category: realisation.categories?.nodes?.[0]?.name || 'Réalisation',
+    client: realisation.realisationsMeta?.client || 'CitizenLab Sénégal',
+    date: realisation.date ? new Date(realisation.date).toLocaleDateString('fr-FR', {
+      day: "numeric",
+      year: 'numeric',
+      month: 'long'
+    }) : 'Date non spécifiée',
+    heroImage: realisation.featuredImage?.node?.mediaItemUrl || getDefaultImage(),
+    description: realisation.excerpt 
+      ? cleanExcerpt(realisation.excerpt)
+      : (realisation.content ? cleanExcerpt(realisation.content.substring(0, 150) + '...') : 'Découvrez ce projet innovant de CitizenLab Sénégal'),
+    challenge: 'Défi à relever pour améliorer la participation citoyenne',
+    solution: 'Solution innovante développée avec nos partenaires',
+    technologies: realisation.realisationsMeta?.technologies || ['Innovation sociale', 'Participation citoyenne', 'Numérique'],
+    features: [],
+    results: realisation.realisationsMeta?.impact 
+      ? [realisation.realisationsMeta.impact] 
+      : ['Impact positif sur la communauté'],
+    testimonial: null,
+    gallery: realisation.featuredImage?.node?.mediaItemUrl 
+      ? [realisation.featuredImage.node.mediaItemUrl] 
+      : []
+  };
+  
+  return acc;
+}, {});
+
+
+
+// Calculer les stats dynamiquement
+const statsData = {
+  projetsRealises: Object.keys(projetsData).length || '25+',
+  citoyensEngages: '15K+',
+  partenaires: '30+',
+  anneesExperience: '5+',
+};
 ---
 
 <Layout metadata={metadata}>
@@ -56,15 +171,15 @@ const categories = ['Tous', ...new Set(Object.values(projetsData).map(p => p.cat
   <Stats
     title="Notre impact en chiffres"
     stats={[
-      { title: 'Projets réalisés', amount: '25+' },
-      { title: 'Citoyens engagés', amount: '15K+' },
-      { title: 'Partenaires', amount: '30+' },
-      { title: 'Années d\'expérience', amount: '5+' },
+      { title: 'Projets réalisés', amount: statsData.projetsRealises.toString() },
+      { title: 'Citoyens engagés', amount: statsData.citoyensEngages },
+      { title: 'Partenaires', amount: statsData.partenaires },
+      { title: 'Années d\'expérience', amount: statsData.anneesExperience },
     ]}
   />
 
   <!-- Projects Grid -->
-  <section id="projets" class="px-4 py-16 sm:px-6 lg:px-8 lg:py-20 mx-auto max-w-7xl">
+  <section id="projets" class="px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
     <div class="mb-12 text-center">
       <h2 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter mb-4 font-heading">
         Projets marquants
@@ -74,87 +189,107 @@ const categories = ['Tous', ...new Set(Object.values(projetsData).map(p => p.cat
       </p>
     </div>
 
-    <!-- Filter Buttons -->
-    <div class="flex flex-wrap justify-center gap-3 mb-12">
-      {categories.map((category) => (
-        <button
-          class="filter-btn px-6 py-2 rounded-full border-2 border-primary transition-all hover:bg-primary hover:text-white"
-          data-category={category}
-        >
-          {category}
-        </button>
-      ))}
-    </div>
-
-    <!-- Projects Grid -->
-    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      {Object.entries(projetsData).map(([id, projet]) => (
-        <article
-          class="project-card group relative overflow-hidden rounded-lg bg-white dark:bg-slate-900 shadow-lg transition-all hover:shadow-2xl"
-          data-category={projet.category}
-        >
-          <div class="relative h-64 overflow-hidden">
-            <img
-              src={projet.heroImage}
-              alt={projet.title}
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              loading="lazy"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-            <span class="absolute top-4 left-4 px-3 py-1 bg-primary text-white text-sm font-semibold rounded-full">
-              {projet.category}
-            </span>
-          </div>
-
-          <div class="p-6">
-            <h3 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
-              {projet.title}
-            </h3>
-
-            <p class="text-muted dark:text-slate-400 mb-4 line-clamp-2">
-              {projet.description}
-            </p>
-
-            <div class="space-y-2 mb-4 text-sm">
-              <div class="flex items-center text-gray-600 dark:text-gray-400">
-                <span class="font-semibold mr-2">Client:</span>
-                <span>{projet.client}</span>
-              </div>
-              <div class="flex items-center text-gray-600 dark:text-gray-400">
-                <span class="font-semibold mr-2">Date:</span>
-                <span>{projet.date}</span>
-              </div>
-              <div class="flex items-center text-gray-600 dark:text-gray-400">
-                <span class="font-semibold mr-2">Impact:</span>
-                <span>{projet.results[0]}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 mb-4">
-              {projet.technologies.slice(0, 3).map((tech) => (
-                <span class="px-2 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 text-xs rounded">
-                  {tech}
+    {Object.keys(projetsData).length === 0 ? (
+      <div class="text-center py-12">
+        <div class="max-w-md mx-auto">
+          <svg class="w-24 h-24 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p class="text-xl text-gray-600 dark:text-gray-400 mb-2">
+            Aucune réalisation disponible pour le moment.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-500">
+            Nos projets seront bientôt publiés. Revenez plus tard !
+          </p>
+        </div>
+      </div>
+    ) : (
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {Object.entries(projetsData).map(([id, projet]) => (
+          <article
+            class="project-card group relative overflow-hidden rounded-lg bg-white dark:bg-slate-900 shadow-lg transition-all hover:shadow-2xl"
+          >
+            <div class="relative h-64 overflow-hidden">
+              <img
+                src={projet.heroImage}
+                alt={projet.title}
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                loading="lazy"
+                onerror="this.src='/assets/images/default.png'"
+              />
+              {/* <div class="absolute top-4 right-4">
+                <span class="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full">
+                  {projet.category}
                 </span>
-              ))}
+              </div> */}
             </div>
 
-            <a
-              href={`/realisations/${id}`}
-              class="inline-flex items-center text-primary font-semibold hover:underline"
-            >
-              Voir le projet
-              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
-        </article>
-      ))}
-    </div>
+            <div class="p-6">
+              <h3 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+                {projet.title}
+              </h3>
+
+              <p class="text-muted dark:text-slate-400 mb-4 line-clamp-2">
+                {projet.description}
+              </p>
+
+              <div class="space-y-2 mb-4 text-sm">
+                {/* <div class="flex items-center text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span class="font-semibold mr-2">Client:</span>
+                  <span class="truncate">{projet.client}</span>
+                </div> */}
+                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span class="font-semibold mr-2">Date:</span>
+                  <span>{projet.date}</span>
+                </div>
+                {/* <div class="flex items-start text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <div>
+                    <span class="font-semibold mr-2">Impact:</span>
+                    <span class="line-clamp-2">{projet.results[0]}</span>
+                  </div>
+                </div> */}
+              </div>
+              
+              {/* <div class="flex flex-wrap gap-2 mb-4">
+                {projet.technologies.slice(0, 3).map((tech) => (
+                  <span class="px-2 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 text-xs rounded">
+                    {tech}
+                  </span>
+                ))}
+                {projet.technologies.length > 3 && (
+                  <span class="px-2 py-1 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400 text-xs rounded">
+                    +{projet.technologies.length - 3}
+                  </span>
+                )}
+              </div> */}
+
+              <a
+                href={`/realisations/${id}`}
+                class="inline-flex items-center text-primary font-semibold hover:underline group-hover:translate-x-1 transition-transform"
+              >
+                Voir le projet
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    )}
   </section>
 
   <!-- Process Section -->
-  <Features3
+  <!-- <Features3
     title="Notre processus de réalisation"
     subtitle="Une approche éprouvée pour des projets réussis"
     columns={4}
@@ -180,7 +315,7 @@ const categories = ['Tous', ...new Set(Object.values(projetsData).map(p => p.cat
         icon: 'tabler:chart-line',
       },
     ]}
-  />
+  /> -->
 
   <!-- Call to Action -->
   <CallToAction
@@ -200,38 +335,6 @@ const categories = ['Tous', ...new Set(Object.values(projetsData).map(p => p.cat
   />
 </Layout>
 
-<script>
-  // Filter functionality
-  document.addEventListener('DOMContentLoaded', () => {
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const projectCards = document.querySelectorAll('.project-card');
-
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const category = btn.getAttribute('data-category');
-
-        // Update active button
-        filterBtns.forEach(b => b.classList.remove('bg-primary', 'text-white'));
-        btn.classList.add('bg-primary', 'text-white');
-
-        // Filter projects
-        projectCards.forEach(card => {
-          const cardCategory = card.getAttribute('data-category');
-          if (category === 'Tous' || cardCategory === category) {
-            card.style.display = 'block';
-            card.style.animation = 'fadeIn 0.5s ease-in';
-          } else {
-            card.style.display = 'none';
-          }
-        });
-      });
-    });
-
-    // Set "Tous" as active by default
-    filterBtns[0]?.classList.add('bg-primary', 'text-white');
-  });
-</script>
-
 <style>
   @keyframes fadeIn {
     from {
@@ -250,4 +353,22 @@ const categories = ['Tous', ...new Set(Object.values(projetsData).map(p => p.cat
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .project-card {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .project-card:nth-child(1) { animation-delay: 0.1s; }
+  .project-card:nth-child(2) { animation-delay: 0.2s; }
+  .project-card:nth-child(3) { animation-delay: 0.3s; }
+  .project-card:nth-child(4) { animation-delay: 0.4s; }
+  .project-card:nth-child(5) { animation-delay: 0.5s; }
+  .project-card:nth-child(6) { animation-delay: 0.6s; }
 </style>
