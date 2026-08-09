@@ -1,19 +1,29 @@
 ---
 import Layout from "~/layouts/PageLayout.astro";
 import { getAllProjets } from "~/utils/api";
+import { FaArrowLeft, FaFacebookF, FaLinkedinIn, FaWhatsapp, FaLink } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 export async function getStaticPaths() {
   const projets = await getAllProjets();
 
   return projets.map((post: any) => ({
     params: { slug: post.slug },
+    props: { projet: post },
   }));
 }
 
-const { slug } = Astro.params;
+type Projet = {
+  title: string;
+  slug: string;
+  date: string;
+  categories?: { nodes?: Array<{ name?: string }> };
+  featuredImage?: { node?: { mediaItemUrl?: string; altText?: string } };
+  content?: string;
+  excerpt?: string;
+};
 
-const projets = await getAllProjets();
-const projet = projets.find((post: any) => post.slug === slug);
+const { projet } = Astro.props as { projet: Projet };
 
 if (!projet) {
   throw new Error("Projet introuvable");
@@ -21,54 +31,202 @@ if (!projet) {
 
 const metadata = {
   title: projet.title,
+  ignoreTitleTemplate: true,
+};
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || '';
+const projetUrl = `${siteUrl}/projets/${projet.slug}`;
+const encodedUrl = encodeURIComponent(projetUrl);
+const encodedTitle = encodeURIComponent(projet.title);
+
+const shareLinks = {
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+  twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+  whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
 };
 ---
 
 <Layout metadata={metadata}>
-  <main class="mx-auto py-16 bg-[#fcfcfc]">
-    <div class="max-w-4xl mx-auto text-center mb-12 space-y-6">
-      <span
-        class="text-base font-semibold text-green-900 mb-2 border border-green-900 px-4 py-3 rounded-full"
-        >{projet.categories?.nodes?.[0]?.name}</span
-      >
-      <h2 class="text-5xl font-bold mb-6 text-green-900">
-        {projet.title}
-      </h2>
-      <p class="text-sm text-center text-green-900 mb-8">
-        • Publié le {
-          new Date(projet.date).toLocaleDateString("fr-FR", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        }
-      </p>
-    </div>
+  <main class="py-12 bg-[#fcfcfc]/80 backdrop-blur-sm">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
 
-    <div class="max-w-4xl mx-auto mb-12">
-      {
-        projet.featuredImage?.node?.mediaItemUrl && (
-          <div class="mb-8">
-            <img
-              src={projet.featuredImage.node.mediaItemUrl}
-              alt={projet.featuredImage.node.altText ?? projet.title}
-              class="w-full h-auto rounded-lg"
-            />
-          </div>
-        )
-      }
-      <!-- Contenu du projet formaté -->
-      <article
-        class="prose prose-lg prose-green max-w-none
-        prose-headings:text-green-900 prose-headings:font-bold
-        prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
-        prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6
-        prose-ul:my-6 prose-ul:space-y-3
-        prose-li:text-gray-700
-        prose-strong:text-green-900 prose-strong:font-semibold"
+      <!-- Retour -->
+      <a
+        href="/projets"
+        class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-800 transition-colors mb-8"
       >
-        <div set:html={projet.content ?? projet.excerpt} />
-      </article>
+        <FaArrowLeft className="w-3 h-3" />
+        Retour aux projets
+      </a>
+
+      <!-- Header -->
+      <div class="mb-8">
+        {projet.categories?.nodes?.[0]?.name && (
+          <span class="inline-block text-xs font-semibold text-green-800 border border-green-200 bg-green-50 px-3 py-1 rounded-full mb-4">
+            {projet.categories.nodes[0].name}
+          </span>
+        )}
+
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 leading-tight">
+          {projet.title}
+        </h1>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-xs text-gray-400">
+            Publié le {new Date(projet.date).toLocaleDateString("fr-FR", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </span>
+
+          <span class="text-gray-200 hidden sm:inline">|</span>
+
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs text-gray-400 mr-0.5">Partager</span>
+            <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="Facebook">
+              <FaFacebookF className="w-3 h-3" />
+            </a>
+            <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="X">
+              <FaXTwitter className="w-3 h-3" />
+            </a>
+            <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="LinkedIn">
+              <FaLinkedinIn className="w-3 h-3" />
+            </a>
+            <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="WhatsApp">
+              <FaWhatsapp className="w-3.5 h-3.5" />
+            </a>
+            <button id="copy-link-top" class="share-icon-btn" aria-label="Copier le lien">
+              <FaLink className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image -->
+      {projet.featuredImage?.node?.mediaItemUrl && (
+        <div class="mb-8">
+          <img
+            src={projet.featuredImage.node.mediaItemUrl}
+            alt={projet.featuredImage.node.altText ?? projet.title}
+            class="w-full h-auto rounded-2xl"
+          />
+        </div>
+      )}
+
+      <!-- Contenu -->
+      <article
+        class="prose prose-base md:prose-lg prose-green max-w-none
+        prose-headings:text-gray-900 prose-headings:font-bold
+        prose-h2:text-xl prose-h2:md:text-2xl prose-h2:mt-8 prose-h2:mb-4
+        prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3
+        prose-p:text-gray-600 prose-p:leading-relaxed prose-p:mb-4
+        prose-ul:my-4 prose-ul:space-y-2
+        prose-li:text-gray-600
+        prose-strong:text-gray-900 prose-strong:font-semibold
+        prose-a:text-green-700 prose-a:no-underline hover:prose-a:underline
+        prose-img:rounded-xl"
+        set:html={projet.content || projet.excerpt || ''}
+      />
+
+      <!-- Partage bas -->
+      <div class="border-t border-gray-100 mt-10 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <span class="text-sm font-semibold text-gray-900">Partager ce projet</span>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaFacebookF className="w-3 h-3" />
+            Facebook
+          </a>
+          <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaWhatsapp className="w-3.5 h-3.5" />
+            WhatsApp
+          </a>
+          <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaXTwitter className="w-3 h-3" />
+            Twitter
+          </a>
+          <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaLinkedinIn className="w-3 h-3" />
+            LinkedIn
+          </a>
+          <button id="copy-link-bottom" class="share-pill-btn">
+            <FaLink className="w-3 h-3" />
+            <span class="copy-label">Copier</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   </main>
 </Layout>
+
+<style>
+  .share-icon-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    background: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .share-icon-btn:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+  }
+
+  .share-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .share-pill-btn:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+  }
+</style>
+
+<script define:vars={{ projetUrl }}>
+  function copyToClipboard(buttonId) {
+    const btn = document.getElementById(buttonId);
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(projetUrl).then(() => {
+        const label = btn.querySelector('.copy-label');
+        if (label) {
+          label.textContent = 'Copié !';
+          setTimeout(() => { label.textContent = 'Copier'; }, 2000);
+        } else {
+          btn.style.borderColor = '#16a34a';
+          btn.style.color = '#166534';
+          setTimeout(() => {
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }, 2000);
+        }
+      });
+    });
+  }
+
+  copyToClipboard('copy-link-top');
+  copyToClipboard('copy-link-bottom');
+</script>

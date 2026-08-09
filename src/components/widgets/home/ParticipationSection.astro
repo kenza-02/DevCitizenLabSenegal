@@ -1,175 +1,118 @@
 ---
-
 import { FiHeart } from "react-icons/fi";
 import { LuBookOpen } from "react-icons/lu";
 import { HiOutlineLightBulb } from "react-icons/hi";
-import { FaCheck } from "react-icons/fa6";
-
+import { FaCheck, FaArrowRightLong } from "react-icons/fa6";
 
 const cardInfos = [
   {
-    titre : "Devenir bénévole",
-    subtitle : "Mettez vos compétences au service de la communauté. Contribuez à nos projets et aidez à créer un impact positif.",
-    details : [
-      {
-        title : "Réseau de professionnels engagés",
-      },
-      {
-        title : "Expérience terrain valorisante",
-      },
-      {
-        title : "Certificat de bénévolat",
-      }
+    titre: "Devenir bénévole",
+    subtitle: "Mettez vos compétences au service de la communauté. Contribuez à nos projets et aidez à créer un impact positif.",
+    details: [
+      { title: "Réseau de professionnels engagés" },
+      { title: "Expérience terrain valorisante" },
+      { title: "Certificat de bénévolat" },
     ],
-    buttonTitle : "Je m'engage",
-    bgButton : "bg-green-600",
-    hoverBgButton : "hover:bg-green-700",
-    bgColor : "bg-green-100",
-    textColor : "text-green-600",
-    icon : FiHeart
+    buttonTitle: "Je m'engage",
+    bgButton: "bg-green-600",
+    hoverBgButton: "hover:bg-green-700",
+    bgColor: "bg-green-100",
+    textColor: "text-green-600",
+    icon: FiHeart,
   },
   {
-    titre : "Rejoindre un bootcamp",
-    subtitle : "Participez à nos formations intensives et développez vos compétences en civic tech avec des experts du domaine.",
-    details : [
-      {
-        title : "Formation certifiante reconnue",
-      },
-      {
-        title : "Mentorat personnalisé",
-      },
-      {
-        title : "Projet concret à développer",
-      }
+    titre: "Rejoindre un bootcamp",
+    subtitle: "Participez à nos formations intensives et développez vos compétences en civic tech avec des experts.",
+    details: [
+      { title: "Formation certifiante reconnue" },
+      { title: "Mentorat personnalisé" },
+      { title: "Projet concret à développer" },
     ],
-    buttonTitle : "Postuler maintenant",
-    bgButton : "bg-red-600",
-    hoverBgButton : "hover:bg-red-700",
-    bgColor : "bg-red-100",
-    textColor : "text-red-600",
-    icon : LuBookOpen
+    buttonTitle: "Postuler maintenant",
+    bgButton: "bg-red-600",
+    hoverBgButton: "hover:bg-red-700",
+    bgColor: "bg-red-100",
+    textColor: "text-red-600",
+    icon: LuBookOpen,
   },
   {
-    titre : "Proposer une idée",
-    subtitle : "Vous avez une idée de projet civic tech ? Soumettez-la et bénéficiez de notre accompagnement pour la concrétiser.",
-    details : [
-      {
-        title : "Évaluation par nos experts",
-      },
-      {
-        title : "Ressources et accompagnement",
-      },
-      {
-        title : "Possibilité de financement",
-      }
+    titre: "Proposer une idée",
+    subtitle: "Vous avez une idée de projet civic tech ? Soumettez-la et bénéficiez de notre accompagnement.",
+    details: [
+      { title: "Évaluation par nos experts" },
+      { title: "Ressources et accompagnement" },
+      { title: "Possibilité de financement" },
     ],
-    buttonTitle : "Soumettre mon idée",
-    bgButton : "bg-yellow-600",
-    hoverBgButton : "hover:bg-yellow-700",
-    bgColor : "bg-yellow-100",
-    textColor : "text-yellow-600",
-    icon : HiOutlineLightBulb 
+    buttonTitle: "Soumettre mon idée",
+    bgButton: "bg-yellow-600",
+    hoverBgButton: "hover:bg-yellow-700",
+    bgColor: "bg-yellow-100",
+    textColor: "text-yellow-600",
+    icon: HiOutlineLightBulb,
   },
-]
+];
 ---
 
-<section
-  class="py-20 bg-gradient-to-br from-green-600 to-green-800 relative overflow-hidden"
->
-  <!-- Motif de fond décoratif -->
-  <div class="absolute inset-0 opacity-10">
-    <div
-      class="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"
-    >
-    </div>
-    <div
-      class="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/3 translate-y-1/3"
-    >
-    </div>
+<section class="bg-gradient-to-br from-green-600/80 to-green-800/80 backdrop-blur-sm py-16 md:py-20 lg:py-24 relative overflow-hidden">
+  <!-- Motif de fond -->
+  <div class="absolute inset-0 opacity-5">
+    <div class="absolute top-0 left-0 w-48 h-48 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="absolute bottom-0 right-0 w-72 h-72 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-    <!-- Titre de section -->
-    <div class="text-center mb-16">
-      <div class="inline-block animate-fade-in-down mb-6">
-        <span
-          class="px-5 py-2 border border-white text-white bg-transparent rounded-full text-xs font-semibold tracking-wide uppercase"
-        >
-          Participation
-        </span>
-      </div>
-      <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-3">
         Comment <span class="text-yellow-300">participer</span> ?
       </h2>
-      <p class="text-xl text-center text-green-50 max-w-2xl mx-auto">
-        Rejoignez notre communauté et contribuez activement à la transformation
-        digitale citoyenne du Sénégal
+      <p class="text-muted-foreground text-center text-green-100 max-w-xl mx-auto">
+        Rejoignez notre communauté et contribuez à la transformation digitale citoyenne du Sénégal
       </p>
     </div>
 
-    <!-- Cartes CTA -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- CTA 1: Devenir bénévole -->
+    <!-- Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
       {cardInfos.map((item) => (
-        <div
-        class="group bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-      >
-        <div class="text-center">
+        <div class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
           <!-- Icône -->
-          <div
-            class={`inline-flex items-center justify-center w-20 h-20 ${item.bgColor} rounded-2xl mb-6 group-hover:scale-110 transition-transform`}
-          >
-            <item.icon className={`w-10 h-10 ${item.textColor}`}/>
+          <div class={`inline-flex items-center justify-center w-12 h-12 ${item.bgColor} rounded-xl mb-4`}>
+            <item.icon className={`w-6 h-6 ${item.textColor}`} />
           </div>
 
-          <h3 class="text-2xl font-bold text-gray-800 mb-4">
+          <h3 class="text-base font-bold text-gray-900 mb-2">
             {item.titre}
           </h3>
 
-          <p class="text-gray-600 mb-6">
+          <p class="text-sm text-gray-500 leading-relaxed mb-4">
             {item.subtitle}
           </p>
 
-          <!-- Liste de bénéfices -->
-          <ul class="text-left text-sm text-gray-600 space-y-2 mb-6">
+          <!-- Bénéfices -->
+          <ul class="text-sm text-gray-600 space-y-2 mb-5">
             {item.details.map((detail) => (
               <li class="flex items-start gap-2">
-              <FaCheck className={`w-5 h-5 ${item.textColor}`} />
-              <span>{detail.title}</span>
-            </li>
+                <FaCheck className={`w-3.5 h-3.5 mt-0.5 ${item.textColor} shrink-0`} />
+                <span class="text-xs">{detail.title}</span>
+              </li>
             ))}
           </ul>
 
+          <!-- Bouton -->
           <a
-            href="/participer"
-            class={`inline-flex items-center justify-center gap-2 w-full px-6 py-3 ${item.bgButton} text-white font-semibold rounded-lg ${item.hoverBgButton} transition-colors shadow-lg group-hover:shadow-xl`}
+            href="/contact"
+            class={`inline-flex items-center justify-center gap-2 w-full px-5 py-2.5 ${item.bgButton} text-white text-sm font-semibold rounded-lg ${item.hoverBgButton} transition-colors`}
           >
             {item.buttonTitle}
-            <svg
-              class="w-5 h-5 group-hover:translate-x-1 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-            </svg>
+            <FaArrowRightLong className="w-3.5 h-3.5" />
           </a>
         </div>
-      </div>
-      ))} 
-      
+      ))}
     </div>
 
     <!-- Message de clôture -->
-    <div class="mt-16 text-center">
-      <p class="text-white text-lg text-center font-medium">
-        Quelle que soit votre contribution, chaque action compte pour bâtir un
-        Sénégal plus démocratique et transparent 🇸🇳
-      </p>
-    </div>
+    <p class="mt-10 text-center text-sm text-green-100">
+      Chaque action compte pour bâtir un Sénégal plus démocratique et transparent 🇸🇳
+    </p>
   </div>
 </section>

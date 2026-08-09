@@ -1,49 +1,34 @@
 ---
-import Layout from '~/layouts/PageLayout.astro';
-import { getAllRealisations } from '~/utils/api';
+import Layout from "~/layouts/PageLayout.astro";
+import { getAllVideos, extractVideoUrl } from "~/utils/api";
 import { FaArrowLeft, FaFacebookF, FaLinkedinIn, FaWhatsapp, FaLink } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
 export async function getStaticPaths() {
-  const realisations = await getAllRealisations();
+  const videos = await getAllVideos();
 
-  return realisations.map((post: any) => ({
-    params: { slug: post.slug || `realisation-${post.id}` },
-    props: { realisation: post },
+  return videos.map((post: any) => ({
+    params: { slug: post.slug },
+    props: { video: post },
   }));
 }
 
-type Realisation = {
-  title?: string;
-  slug?: string;
-  content?: string | null;
-  excerpt?: string | null;
-  date?: string;
-  categories?: {
-    nodes?: Array<{ name?: string }>;
-  };
-  featuredImage?: {
-    node?: {
-      mediaItemUrl?: string;
-      altText?: string | null;
-    };
-  };
-};
+const { video } = Astro.props as { video: any };
 
-const { realisation } = Astro.props as { realisation: Realisation };
-
-if (!realisation) {
-  throw new Error("Réalisation introuvable");
+if (!video) {
+  throw new Error("Vidéo introuvable");
 }
 
+const videoHtml = extractVideoUrl(video.content);
+
 const metadata = {
-  title: `${realisation.title ?? 'Réalisation'} | Réalisations`,
+  title: `${video.title} — Vidéos`,
 };
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') || '';
-const pageUrl = `${siteUrl}/realisations/${realisation.slug}`;
+const pageUrl = `${siteUrl}/videos/${video.slug}`;
 const encodedUrl = encodeURIComponent(pageUrl);
-const encodedTitle = encodeURIComponent(realisation.title || '');
+const encodedTitle = encodeURIComponent(video.title);
 
 const shareLinks = {
   facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
@@ -54,40 +39,36 @@ const shareLinks = {
 ---
 
 <Layout metadata={metadata}>
-  <main class="py-12 bg-[#fcfcfc]/80 backdrop-blur-sm">
+  <main class="py-12 bg-[#fcfcfc]/90 backdrop-blur-sm">
     <div class="max-w-4xl mx-auto px-6 lg:px-8">
 
       <!-- Retour -->
       <a
-        href="/realisations"
+        href="/videos"
         class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-800 transition-colors mb-8"
       >
         <FaArrowLeft className="w-3 h-3" />
-        Retour aux réalisations
+        Retour aux vidéos
       </a>
 
       <!-- Header -->
-      <div class="mb-8">
-        {realisation.categories?.nodes?.[0]?.name && (
-          <span class="inline-block text-xs font-semibold text-green-800 border border-green-200 bg-green-50 px-3 py-1 rounded-full mb-4">
-            {realisation.categories.nodes[0].name}
-          </span>
-        )}
+      <div class="mb-6">
+        <span class="inline-block text-xs font-semibold text-green-800 border border-green-200 bg-green-50 px-3 py-1 rounded-full mb-4">
+          Vidéo
+        </span>
 
         <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 leading-tight">
-          {realisation.title}
+          {video.title}
         </h1>
 
         <div class="flex flex-wrap items-center gap-3">
-          {realisation.date && (
-            <span class="text-xs text-gray-400">
-              {new Date(realisation.date).toLocaleDateString("fr-FR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </span>
-          )}
+          <span class="text-xs text-gray-400">
+            {new Date(video.date).toLocaleDateString("fr-FR", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </span>
 
           <span class="text-gray-200 hidden sm:inline">|</span>
 
@@ -112,35 +93,40 @@ const shareLinks = {
         </div>
       </div>
 
-      <!-- Image -->
-      {realisation.featuredImage?.node?.mediaItemUrl && (
-        <div class="mb-8">
+      <!-- Lecteur vidéo -->
+      {videoHtml ? (
+        <div class="rounded-2xl overflow-hidden border border-gray-200 mb-8 bg-black">
+          <div class="video-player" set:html={videoHtml} />
+        </div>
+      ) : video.content ? (
+        <!-- Fallback  -->
+        <div class="rounded-2xl overflow-hidden border border-gray-200 mb-8 bg-black">
+          <div class="video-player" set:html={video.content} />
+        </div>
+      ) : video.featuredImage?.node?.mediaItemUrl ? (
+        <div class="rounded-2xl overflow-hidden mb-8">
           <img
-            src={realisation.featuredImage.node.mediaItemUrl}
-            alt={realisation.featuredImage.node.altText ?? realisation.title}
-            class="w-full h-auto rounded-2xl"
+            src={video.featuredImage.node.mediaItemUrl}
+            alt={video.featuredImage.node.altText ?? video.title}
+            class="w-full h-auto"
+          />
+        </div>
+      ) : null}
+
+      <!-- Description -->
+      {video.excerpt && (
+        <div class="mb-8">
+          <h2 class="text-lg font-bold text-gray-900 mb-3">À propos de cette vidéo</h2>
+          <div
+            class="text-sm text-gray-600 leading-relaxed"
+            set:html={video.excerpt}
           />
         </div>
       )}
 
-      <!-- Contenu -->
-      <article
-        class="prose prose-base md:prose-lg prose-green max-w-none
-        prose-headings:text-gray-900 prose-headings:font-bold
-        prose-h2:text-xl prose-h2:md:text-2xl prose-h2:mt-8 prose-h2:mb-4
-        prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3
-        prose-p:text-gray-600 prose-p:leading-relaxed prose-p:mb-4
-        prose-ul:my-4 prose-ul:space-y-2
-        prose-li:text-gray-600
-        prose-strong:text-gray-900 prose-strong:font-semibold
-        prose-a:text-green-700 prose-a:no-underline hover:prose-a:underline
-        prose-img:rounded-xl"
-        set:html={realisation.content || realisation.excerpt || ''}
-      />
-
       <!-- Partage bas -->
       <div class="border-t border-gray-100 mt-10 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <span class="text-sm font-semibold text-gray-900">Partager cette réalisation</span>
+        <span class="text-sm font-semibold text-gray-900">Partager cette vidéo</span>
 
         <div class="flex flex-wrap items-center gap-2">
           <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
@@ -171,6 +157,33 @@ const shareLinks = {
 </Layout>
 
 <style>
+  .video-player :global(video) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .video-player :global(figure) {
+    margin: 0;
+  }
+  .video-player :global(figure video) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .video-player :global(iframe) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    display: block;
+    border: none;
+  }
+  .video-player :global(.wp-block-embed),
+  .video-player :global(.wp-block-embed__wrapper) {
+    margin: 0;
+  }
+  .video-player :global(p) {
+    display: none;
+  }
+
   .share-icon-btn {
     width: 28px;
     height: 28px;

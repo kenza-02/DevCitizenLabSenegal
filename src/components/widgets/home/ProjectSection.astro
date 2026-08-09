@@ -1,94 +1,150 @@
 ---
+import { FaArrowRightLong } from "react-icons/fa6";
 import { getLatestProjets } from "~/utils/api";
+import {HiArrowRight} from "react-icons/hi";
 
 const projects = await getLatestProjets(3);
 ---
 
-<section class="py-20 bg-white">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-16">
-      <div class="inline-block animate-fade-in-down mb-6">
-        <span
-          class="px-5 py-2 border border-green-600 text-green-600 bg-white rounded-full text-xs font-semibold tracking-wide uppercase"
-        >
-          Projets
-        </span>
-      </div>
-      <h2 class="text-4xl md:text-5xl font-bold mb-4">
+<section class="bg-white/90 backdrop-blur-sm py-16 md:py-20 lg:py-24">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+
+    <!-- En-tête -->
+    <div class="mx-auto mb-14 space-y-6 text-center md:mb-16 lg:mb-20">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900">
         Nos <span class="text-green-600">projets phares</span>
       </h2>
-      <p class="text-lg text-center text-gray-600 max-w-2xl mx-auto">
-        Découvrez comment nous utilisons la technologie pour renforcer la
-        participation citoyenne et résoudre des défis locaux
+
+      <p
+        class="text-muted-foreground text-gray-500 max-w-xl text-center mx-auto"
+      >
+        Découvrez comment nous utilisons la technologie pour renforcer la participation citoyenne
       </p>
+
+      <div class="mx-auto h-1 w-20 rounded-full bg-green-500"></div>
+
     </div>
 
     {projects.length > 0 ? (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-        {projects.map((project) => (
-          <div
-            class="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-          >
-            <div class="relative h-64 overflow-hidden">
-              <img
-                src={project.featuredImage?.node?.mediaItemUrl}
-                alt={project.featuredImage?.node?.altText || project.title}
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"
-              >
+      <div class="flex flex-col gap-4 mb-10">
+
+        {projects.length <= 2 ? (
+          projects.map((project: any, index: number) => (
+            <a
+              href={project.uri}
+              class={`group flex flex-col lg:flex-row ${index % 2 !== 0 ? "lg:flex-row-reverse" : ""} rounded-2xl overflow-hidden border border-gray-100 hover:border-green-300 shadow-sm hover:shadow-lg transition-all duration-300 bg-white`}
+            >
+              <div class="lg:w-[45%] relative h-44 lg:h-auto overflow-hidden">
+                <img
+                  src={project.featuredImage?.node?.mediaItemUrl}
+                  alt={project.featuredImage?.node?.altText || project.title}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+                <span class="absolute top-3 left-3 bg-green-600 text-white text-[10px] font-semibold uppercase tracking-wide px-3 py-1 rounded-full">
+                  {project.categories?.nodes?.[0]?.name ?? "Projet"}
+                </span>
               </div>
+
+              <div class="flex-1 p-5 lg:p-6 flex flex-col justify-center">
+                <h3 class="text-base font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-800 transition-colors">
+                  {project.title}
+                </h3>
+                <div class="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-3" set:html={project.excerpt} />
+                <span class="inline-flex items-center gap-2 text-sm font-medium text-green-700 group-hover:text-green-900 transition-colors">
+                  Voir le projet
+                  <span class="inline-flex items-center justify-center w-7 h-7 bg-green-50 group-hover:bg-green-600 rounded-full transition-all duration-300">
+                    <FaArrowRightLong className="w-3 h-3 text-green-600 group-hover:text-white transition-colors" />
+                  </span>
+                </span>
+              </div>
+            </a>
+          ))
+        ) : (
+          <!-- 3+ projets : featured + grille -->
+          <>
+            {/* Carte featured */}
+            <a
+              href={projects[0].uri}
+              class="group flex flex-col lg:flex-row rounded-2xl overflow-hidden border border-gray-100 hover:border-green-300 shadow-sm hover:shadow-lg transition-all duration-300 bg-white"
+            >
+              <div class="lg:w-[50%] relative h-44 lg:h-auto overflow-hidden">
+                <img
+                  src={projects[0].featuredImage?.node?.mediaItemUrl}
+                  alt={projects[0].featuredImage?.node?.altText || projects[0].title}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+                <span class="absolute top-3 left-3 bg-green-600 text-white text-[10px] font-semibold uppercase tracking-wide px-3 py-1 rounded-full">
+                  {projects[0].categories?.nodes?.[0]?.name ?? "Projet"}
+                </span>
+              </div>
+
+              <div class="flex-1 p-5 lg:p-6 flex flex-col justify-center">
+                <h3 class="text-base md:text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-800 transition-colors">
+                  {projects[0].title}
+                </h3>
+                <div class="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-3" set:html={projects[0].excerpt} />
+                <span class="inline-flex items-center gap-2 text-sm font-medium text-green-700 group-hover:text-green-900 transition-colors">
+                  Voir le projet
+                  <span class="inline-flex items-center justify-center w-7 h-7 bg-green-50 group-hover:bg-green-600 rounded-full transition-all duration-300">
+                    <FaArrowRightLong className="w-3 h-3 text-green-600 group-hover:text-white transition-colors" />
+                  </span>
+                </span>
+              </div>
+            </a>
+
+            {/* Grille des autres projets */}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {projects.slice(1).map((project: any) => (
+                <a href={project.uri} class="block h-full">
+                  <article class="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-green-300 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                    <div class="relative h-40 overflow-hidden">
+                      <img
+                        src={project.featuredImage?.node?.mediaItemUrl}
+                        alt={project.featuredImage?.node?.altText || project.title}
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-[10px] font-semibold text-gray-800 uppercase tracking-wide px-2.5 py-1 rounded-full">
+                        {project.categories?.nodes?.[0]?.name ?? "Projet"}
+                      </span>
+                    </div>
+
+                    <div class="p-5 flex flex-col flex-1">
+                      <h3 class="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-800 transition-colors">
+                        {project.title}
+                      </h3>
+                      <div class="text-xs text-gray-500 leading-relaxed line-clamp-2 flex-1" set:html={project.excerpt} />
+                    </div>
+
+                    <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50">
+                      <span class="text-xs font-medium text-green-700">Voir le projet</span>
+                      <span class="inline-flex items-center justify-center w-7 h-7 bg-green-50 group-hover:bg-green-600 rounded-full transition-all duration-300">
+                        <FaArrowRightLong className="w-3 h-3 text-green-600 group-hover:text-white transition-colors" />
+                      </span>
+                    </div>
+                  </article>
+                </a>
+              ))}
             </div>
-            <div class="p-6">
-              <h3 class="text-2xl font-bold mb-3 text-gray-800">
-                {project.title}
-              </h3>
-              <p class="text-gray-600 mb-4 line-clamp-3" set:html={project.excerpt} />
-              <a
-                href={project.uri}
-                class="inline-flex items-center gap-2 text-green-600 font-semibold hover:text-green-700 transition-colors group/link"
-              >
-                Voir le projet
-                <svg
-                  class="w-5 h-5 group-hover/link:translate-x-1 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                </svg>
-              </a>
-            </div>
-          </div>
-        ))}
+          </>
+        )}
       </div>
     ) : (
-      <p class="text-center text-gray-500 mb-12">Aucun projet disponible pour le moment.</p>
+      <p class="text-center text-sm text-gray-400 mb-10">
+        Aucun projet disponible pour le moment.
+      </p>
     )}
 
+    <!-- CTA -->
     <div class="text-center">
       <a
         href="/projets"
-        class="inline-flex items-center gap-3 px-8 py-4 text-lg font-semibold bg-gray-900 text-white hover:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-green-700 hover:text-green-800 transition-colors group"
       >
-        Tous les projets
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 5l7 7-7 7"></path>
-        </svg>
+        Voir tous les projets
+        <HiArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
       </a>
     </div>
   </div>

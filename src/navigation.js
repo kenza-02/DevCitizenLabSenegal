@@ -6,8 +6,8 @@ export const headerData = {
     {
       text: "Qui sommes nous",
       links: [
-        { text: "A propos", href: getPermalink("/a-propos") },
-        { text: "Equipe", href: getPermalink("/equipe") },
+        { text: "À propos", href: getPermalink("/a-propos") },
+        { text: "Équipe", href: getPermalink("/equipe") },
         { text: "Partenaires", href: getPermalink("/partenaires") },
         { text: "FAQ", href: getPermalink("/faq") },
       ],
@@ -23,15 +23,16 @@ export const headerData = {
       text: "Médias & Actualités",
       links: [
         { text: "Actualités", href: getPermalink("/news") },
+        { text: "Magazines", href: getPermalink("/magazines") },
         // { text: "Campagnes", href: getPermalink("campagnes", "category") },
         // { text: "Blog / Opinions", href: getPermalink("blog", "category") },
         { text: "Podcasts", href: getPermalink("/podcasts") },
-        { text: "Vidéos", href: getPermalink("videos") },
+        { text: "Vidéos", href: getPermalink("/videos") },
       ],
     },
     {
       text: "Formations & Ressources",
-      href: getPermalink("/formations/bootcamps-ateliers"),
+      href: getPermalink("/formations"),
       // links: [
       //   { text: "Bootcamps / Ateliers", href: getPermalink("/bootcamp") },
       //   {
@@ -68,6 +69,8 @@ export const footerData = {
           href: getPermalink("/a-propos"),
         },
         { text: "Equipe", href: getPermalink("/equipe") },
+        { text: "Partenaires", href: getPermalink("/partenaires") },
+        { text: "FAQ", href: getPermalink("/faq") },
       ],
     },
     {
@@ -118,10 +121,10 @@ export const footerData = {
       icon: "tabler:brand-linkedin",
       href: "https://www.linkedin.com/company/citizenlab-senegal/",
     },
-    {
+    /*{
       icon: "tabler:brand-github",
       href: "https://github.com/AfricTivistes/citizenlabsenegal",
-    },
+    },*/
   ],
   footNote: `
   <a href="https://www.africtivistes.com" target= '_blank'>

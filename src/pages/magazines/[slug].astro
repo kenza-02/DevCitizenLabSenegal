@@ -1,0 +1,299 @@
+---
+import Layout from "~/layouts/PageLayout.astro";
+import { getAllMagazines } from "~/utils/api";
+import { FaArrowLeft, FaDownload, FaCalendarAlt, FaFilePdf, FaFacebookF, FaLinkedinIn, FaWhatsapp, FaLink } from "react-icons/fa";
+import { FaXTwitter, FaArrowUpRightFromSquare } from "react-icons/fa6";
+
+interface MagazinePost {
+  slug: string;
+  magazine: {
+    titre: string;
+    description: string;
+    date: string;
+    fichier: {
+      node: {
+        mediaItemUrl: string;
+        altText: string;
+      };
+    } | null;
+  };
+  featuredImage: {
+    node: {
+      mediaItemUrl: string;
+      altText: string;
+    };
+  } | null;
+}
+
+export async function getStaticPaths() {
+  const magazines = await getAllMagazines();
+
+  return magazines.map((post: MagazinePost) => ({
+    params: { slug: post.slug },
+    props: { magazine: post },
+  }));
+}
+
+const { magazine } = Astro.props as { magazine: MagazinePost };
+
+if (!magazine) {
+  throw new Error("Magazine introuvable");
+}
+
+const fichierUrl = magazine.magazine?.fichier?.node?.mediaItemUrl || "";
+const isPdf = fichierUrl.toLowerCase().endsWith(".pdf");
+
+const metadata = {
+  title: `${magazine.magazine?.titre} — Magazines`,
+  ignoreTitleTemplate : true,
+};
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || '';
+const pageUrl = `${siteUrl}/magazines/${magazine.slug}`;
+const encodedUrl = encodeURIComponent(pageUrl);
+const encodedTitle = encodeURIComponent(magazine.magazine?.titre || '');
+
+const shareLinks = {
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+  twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+  whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
+};
+---
+
+<Layout metadata={metadata}>
+  <main class="py-12 bg-[#fcfcfc]/80 backdrop-blur-sm">
+    <div class="max-w-5xl mx-auto px-6 lg:px-8">
+
+      <!-- Retour -->
+      <a
+        href="/magazines"
+        class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-800 transition-colors mb-8"
+      >
+        <FaArrowLeft className="w-3 h-3" />
+        Retour aux magazines
+      </a>
+
+      <!-- Header : couverture + infos -->
+      <div class="flex flex-col md:flex-row gap-6 md:gap-8 mb-8">
+        <!-- Couverture -->
+        {magazine.featuredImage?.node?.mediaItemUrl && (
+          <div class="w-full md:w-56 lg:w-64 shrink-0">
+            <div class="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+              <img
+                src={magazine.featuredImage.node.mediaItemUrl}
+                alt={magazine.featuredImage.node.altText ?? magazine.magazine?.titre}
+                class="w-full h-auto object-cover"
+              />
+            </div>
+          </div>
+        )}
+
+        <!-- Infos -->
+        <div class="flex-1 flex flex-col justify-center">
+          <span class="inline-block text-[9px] font-semibold bg-green-600 text-white px-2.5 py-0.5 rounded-full uppercase tracking-wide mb-3 self-start">
+            Magazine
+          </span>
+
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3 leading-tight">
+            {magazine.magazine?.titre}
+          </h1>
+
+          {magazine.magazine?.date && (
+            <span class="inline-flex items-center gap-1.5 text-xs text-gray-400 mb-4">
+              <FaCalendarAlt className="w-3 h-3" />
+              {new Date(magazine.magazine.date).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
+          )}
+
+          {magazine.magazine?.description && (
+            <p class="text-sm text-gray-500 leading-relaxed mb-5">
+              {magazine.magazine.description}
+            </p>
+          )}
+
+          <!-- Actions -->
+          <div class="flex flex-wrap items-center gap-3">
+            {fichierUrl && (
+              <a
+                href={fichierUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                <FaDownload className="w-3.5 h-3.5" />
+                Télécharger
+              </a>
+            )}
+
+            <!-- Partage rapide -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs text-gray-400 mr-0.5">Partager</span>
+              <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="Facebook">
+                <FaFacebookF className="w-3 h-3" />
+              </a>
+              <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="X">
+                <FaXTwitter className="w-3 h-3" />
+              </a>
+              <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="LinkedIn">
+                <FaLinkedinIn className="w-3 h-3" />
+              </a>
+              <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="WhatsApp">
+                <FaWhatsapp className="w-3.5 h-3.5" />
+              </a>
+              <button id="copy-link-top" class="share-icon-btn" aria-label="Copier le lien">
+                <FaLink className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lecteur de document -->
+      {fichierUrl && (
+        <div class="border border-gray-200 rounded-2xl overflow-hidden mb-8">
+          <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+            <span class="inline-flex items-center gap-2 text-sm text-gray-500">
+              <FaFilePdf className="w-4 h-4 text-green-700" />
+              Lire le magazine
+            </span>
+            <a
+              href={fichierUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3.5 py-1.5 rounded-lg transition-colors"
+            >
+              <FaArrowUpRightFromSquare className="w-3 h-3" />
+              Ouvrir
+            </a>
+          </div>
+
+          {isPdf ? (
+            <iframe
+              src={fichierUrl}
+              class="w-full border-0"
+              style="height: 80vh;"
+              title={magazine.magazine?.titre}
+            />
+          ) : (
+            <div class="py-16 text-center text-gray-400">
+              <FaFilePdf className="w-12 h-12 mx-auto mb-4" />
+              <p class="text-sm mb-3">Aperçu non disponible pour ce type de fichier.</p>
+              <a
+                href={fichierUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-green-600 hover:text-green-800 font-medium underline text-sm"
+              >
+                Ouvrir le document
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
+      <!-- Partage bas -->
+      <div class="border-t border-gray-100 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <span class="text-sm font-semibold text-gray-900">Partager ce magazine</span>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaFacebookF className="w-3 h-3" />
+            Facebook
+          </a>
+          <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaWhatsapp className="w-3.5 h-3.5" />
+            WhatsApp
+          </a>
+          <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaXTwitter className="w-3 h-3" />
+            Twitter
+          </a>
+          <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaLinkedinIn className="w-3 h-3" />
+            LinkedIn
+          </a>
+          <button id="copy-link-bottom" class="share-pill-btn">
+            <FaLink className="w-3 h-3" />
+            <span class="copy-label">Copier</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .share-icon-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    background: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .share-icon-btn:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+  }
+
+  .share-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .share-pill-btn:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+  }
+</style>
+
+<script define:vars={{ pageUrl }}>
+  function copyToClipboard(buttonId) {
+    const btn = document.getElementById(buttonId);
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pageUrl).then(() => {
+        const label = btn.querySelector('.copy-label');
+        if (label) {
+          label.textContent = 'Copié !';
+          setTimeout(() => { label.textContent = 'Copier'; }, 2000);
+        } else {
+          btn.style.borderColor = '#16a34a';
+          btn.style.color = '#166534';
+          setTimeout(() => {
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }, 2000);
+        }
+      });
+    });
+  }
+
+  copyToClipboard('copy-link-top');
+  copyToClipboard('copy-link-bottom');
+</script>

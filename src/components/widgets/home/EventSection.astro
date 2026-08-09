@@ -7,7 +7,7 @@ import { GoGoal } from "react-icons/go";
 import { CiCircleInfo } from "react-icons/ci";
 import { FaCode, FaArrowRightLong } from "react-icons/fa6";
 import { IoIosStats } from "react-icons/io";
-import { IoBookOutline } from "react-icons/io5";
+import { HiArrowRight } from "react-icons/hi";
 
 const eventDetails = [
   {
@@ -52,24 +52,23 @@ const formations = [
 ];
 ---
 
-<section class="py-20 bg-white">
+<section class="bg-gray-50/90 backdrop-blur-sm py-16 md:py-20 lg:py-24">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Titre de section -->
-    <div class="text-center mb-16">
-      <div class="inline-block animate-fade-in-down mb-6">
-        <span
-          class="px-5 py-2 border border-green-600 text-green-600 bg-white rounded-full text-xs font-semibold tracking-wide uppercase"
-        >
-          Évenements
-        </span>
-      </div>
-      <h2 class="text-4xl md:text-5xl font-bold mb-4">
+    <!-- En-tête -->
+    <div class="mx-auto mb-14 space-y-6 text-center md:mb-16 lg:mb-20">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900">
         Formations & <span class="text-green-600">Bootcamps</span>
       </h2>
-      <p class="text-lg text-center text-gray-600 max-w-2xl mx-auto">
+
+      <p
+        class="text-muted-foreground text-gray-500 max-w-xl text-center mx-auto"
+      >
         Développez vos compétences en civic tech et devenez un acteur du
         changement digital au Sénégal
       </p>
+
+      <div class="mx-auto h-1 w-20 rounded-full bg-green-500"></div>
+
     </div>
 
     <!-- Formation phare en vedette -->
@@ -131,7 +130,7 @@ const formations = [
                       <div class="font-semibold text-gray-800">
                         {detail.title}
                       </div>
-                      <div class="text-gray-600">{detail.details}</div>
+                      <div class="text-gray-600 text-sm">{detail.details}</div>
                     </div>
                   </div>
                 ))
@@ -142,14 +141,14 @@ const formations = [
             <div class="flex flex-col sm:flex-row gap-3">
               <a
                 href="/formations/civic-tech-innovators"
-                class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 shadow-md transition-all"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 shadow-md transition-all"
               >
                 S'inscrire
                 <FaArrowRightLong className="w-3 h-3" />
               </a>
               <a
                 href="/formations/civic-tech-innovators"
-                class="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-green-600 text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-all"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm rounded-lg border border-green-600 text-green-600 hover:bg-green-50 transition-all"
               >
                 En savoir plus
               </a>
@@ -161,7 +160,7 @@ const formations = [
 
     <!-- Mini aperçu des autres formations -->
     <div class="max-w-5xl mx-auto mb-12">
-      <h3 class="text-2xl font-bold text-center mb-8 text-gray-800">
+      <h3 class="text-xl font-bold text-center mb-8 text-gray-800">
         Autres formations disponibles
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -177,7 +176,7 @@ const formations = [
               </p>
               <a
                 href={formation.link}
-                class="inline-flex items-center gap-2 text-sm font-semibold text-green-600 hover:text-green-800"
+                class="inline-flex items-center gap-2 text-sm text-green-600 hover:text-green-800"
               >
                 En savoir plus
                 <FaArrowRightLong className="w-3 h-3" />
@@ -192,10 +191,10 @@ const formations = [
     <div class="text-center">
       <a
         href="/formations/bootcamps-ateliers"
-        class="inline-flex items-center gap-3 px-8 py-4 text-lg font-semibold bg-gray-900 text-white hover:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-green-700 hover:text-green-800 transition-colors group"
       >
         Voir toutes les formations
-        <IoBookOutline className="w-5 h-5" />
+        <HiArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
       </a>
     </div>
   </div>

@@ -790,6 +790,7 @@ export async function getAllActualites() {
             nodes {
               title
               excerpt
+              content
               slug
               uri
               date
@@ -814,6 +815,7 @@ export async function getAllActualites() {
   const { data } = await response.json();
   return data?.posts?.nodes ?? [];
 }
+
 export async function getAllProjets() {
   const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
   const response = await fetch(apiUrl, {
@@ -975,3 +977,151 @@ export async function getRealisationBySlug(slug) {
     return null;
   }
 }
+
+export async function getAllFormations() {
+  const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
+
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
+        query GetAllFormations {
+          posts(
+            where: { categoryName: "Formations", status: PUBLISH }
+            first: 100
+          ) {
+            nodes {
+              slug
+              formation {
+                nom
+                description
+                lieu
+                date
+                prix
+                statut
+                duree
+                formateur
+                profession
+                places
+                lien {
+                  url
+                  title
+                  target
+                }
+              }
+              featuredImage {
+                node {
+                  mediaItemUrl
+                  altText
+                }
+              }    
+            }
+          }
+        }
+      `,
+    }),
+  });
+
+  const json = await response.json();
+  console.log("GRAPHQL:", json);
+
+  return json?.data?.posts?.nodes ?? [];
+}
+
+export async function getAllMagazines() {
+  const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
+
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
+        query GetAllMagazines {
+          posts(
+            where: { categoryName: "Magazine", status: PUBLISH }
+            first: 100
+          ) {
+            nodes {
+              slug
+              magazine {
+                titre
+                description
+                date
+                fichier {
+                  node {
+                    mediaItemUrl
+                    altText
+                  }
+                }
+              }
+              featuredImage {
+                node {
+                  mediaItemUrl
+                  altText
+                }
+              }    
+            }
+          }
+        }
+      `,
+    }),
+  });
+
+  const json = await response.json();
+  console.log("GRAPHQL:", json);
+
+  return json?.data?.posts?.nodes ?? [];
+}
+
+export function extractVideoUrl(postContent) {
+  if (!postContent) return "";
+
+  // <video> natif
+  const match = postContent.match(/<video[\s\S]*?<\/video>/);
+  if (match) return match[0];
+
+  // Bloc Gutenberg wp-block-video
+  const wpVideoMatch = postContent.match(
+    /<figure class="wp-block-video"[\s\S]*?<\/figure>/,
+  );
+  if (wpVideoMatch) return wpVideoMatch[0];
+
+  return "";
+}
+
+export async function getAllVideos() {
+  const apiUrl = import.meta.env.PUBLIC_WORDPRESS_API_URL;
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
+        query GetAllVideos {
+          posts(
+            where: { categoryName: "Videos" }
+            first: 100
+          ) {
+            nodes {
+              title
+              excerpt
+              content
+              slug
+              uri
+              date
+              featuredImage {
+                node {
+                  mediaItemUrl
+                  altText
+                }
+              }
+            }
+          }
+        }
+      `,
+    }),
+  });
+  const { data } = await response.json();
+  return data?.posts?.nodes ?? [];
+}
+

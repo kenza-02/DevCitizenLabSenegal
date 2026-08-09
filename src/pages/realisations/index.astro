@@ -1,36 +1,9 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
-import Features3 from '~/components/widgets/Features3.astro';
-import Stats from '~/components/widgets/Stats.astro';
-import CallToAction from '~/components/widgets/CallToAction.astro';
+import PageBanner from '~/components/widgets/PageBanner.astro';
 import RealisationsImg from '~/assets/images/realisations.jpg';
 import { getAllRealisations } from '~/utils/api';
-
-// Définir les interfaces de type pour les données
-interface RealisationMeta {
-  client?: string;
-  periode?: string;
-  technologies?: string[];
-  impact?: string;
-}
-
-interface Category {
-  name: string;
-  slug: string;
-}
-
-interface FeaturedImage {
-  node: {
-    mediaItemUrl: string;
-    altText: string;
-    srcSet?: string;
-    sourceUrl?: string;
-    mediaDetails?: {
-      height: number;
-      width: number;
-    };
-  };
-}
+import { FaArrowRight, FaArrowRightLong } from "react-icons/fa6";
 
 interface Realisation {
   id: string;
@@ -39,33 +12,9 @@ interface Realisation {
   content?: string;
   date?: string;
   slug?: string;
-  uri?: string;
-  categories?: {
-    nodes: Category[];
-  };
-  featuredImage?: FeaturedImage;
-  realisationsMeta?: RealisationMeta;
-}
-
-interface Project {
-  title: string;
-  category: string;
-  client: string;
-  date: string;
-  heroImage: string;
-  description: string;
-  challenge: string;
-  solution: string;
-  technologies: string[];
-  features: Array<{ title: string; description: string; icon: string }>;
-  results: string[];
-  testimonial: null | {
-    quote: string;
-    author: string;
-    role: string;
-    image: string;
-  };
-  gallery: string[];
+  categories?: { nodes: { name: string; slug: string }[] };
+  featuredImage?: { node: { mediaItemUrl: string; altText: string } };
+  realisationsMeta?: { client?: string; technologies?: string[]; impact?: string };
 }
 
 const metadata = {
@@ -73,302 +22,186 @@ const metadata = {
   description: 'Découvrez nos projets réalisés en matière de participation citoyenne et d\'innovation sociale au Sénégal.',
 };
 
-// Récupérer les réalisations depuis l'API
 const realisations: Realisation[] = await getAllRealisations();
 
-
-// Fonction helper pour nettoyer l'excerpt HTML
 function cleanExcerpt(excerpt: string): string {
   return excerpt.replace(/<[^>]*>/g, '').trim();
 }
 
-// Fonction pour obtenir une image par défaut
-function getDefaultImage(): string {
-  return '/assets/images/default.png';
-}
-
-// Transformer les données de l'API pour correspondre à la structure attendue
-const projetsData: Record<string, Project> = realisations.reduce((acc: Record<string, Project>, realisation: Realisation, index: number) => {
-  const projectId = realisation.slug || `realisation-${index}`;
-  
-  acc[projectId] = {
-    title: realisation.title,
-    category: realisation.categories?.nodes?.[0]?.name || 'Réalisation',
-    client: realisation.realisationsMeta?.client || 'CitizenLab Sénégal',
-    date: realisation.date ? new Date(realisation.date).toLocaleDateString('fr-FR', {
-      day: "numeric",
-      year: 'numeric',
-      month: 'long'
+const projets = realisations.map((r, index) => {
+  const id = r.slug || `realisation-${index}`;
+  return {
+    id,
+    title: r.title,
+    category: r.categories?.nodes?.[0]?.name || 'Réalisation',
+    date: r.date ? new Date(r.date).toLocaleDateString('fr-FR', {
+      day: "numeric", year: 'numeric', month: 'long'
     }) : 'Date non spécifiée',
-    heroImage: realisation.featuredImage?.node?.mediaItemUrl || getDefaultImage(),
-    description: realisation.excerpt 
-      ? cleanExcerpt(realisation.excerpt)
-      : (realisation.content ? cleanExcerpt(realisation.content.substring(0, 150) + '...') : 'Découvrez ce projet innovant de CitizenLab Sénégal'),
-    challenge: 'Défi à relever pour améliorer la participation citoyenne',
-    solution: 'Solution innovante développée avec nos partenaires',
-    technologies: realisation.realisationsMeta?.technologies || ['Innovation sociale', 'Participation citoyenne', 'Numérique'],
-    features: [],
-    results: realisation.realisationsMeta?.impact 
-      ? [realisation.realisationsMeta.impact] 
-      : ['Impact positif sur la communauté'],
-    testimonial: null,
-    gallery: realisation.featuredImage?.node?.mediaItemUrl 
-      ? [realisation.featuredImage.node.mediaItemUrl] 
-      : []
+    image: r.featuredImage?.node?.mediaItemUrl || '/assets/images/default.png',
+    description: r.excerpt
+      ? cleanExcerpt(r.excerpt)
+      : (r.content ? cleanExcerpt(r.content.substring(0, 150) + '...') : 'Découvrez ce projet innovant de CitizenLab Sénégal'),
   };
-  
-  return acc;
-}, {});
+});
 
-
-
-// Calculer les stats dynamiquement
-const statsData = {
-  projetsRealises: Object.keys(projetsData).length || '25+',
-  citoyensEngages: '15K+',
-  partenaires: '30+',
-  anneesExperience: '5+',
-};
 ---
 
 <Layout metadata={metadata}>
-  <!-- Hero Banner -->
-  <section class="relative h-[70vh] min-h-[500px] overflow-hidden">
-    <img
-      src={RealisationsImg.src}
-      alt="Nos Réalisations"
-      class="absolute inset-0 w-full h-full object-cover"
-    />
-    <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
-
-    <div class="relative h-full flex items-center justify-center text-center px-4">
-      <div class="max-w-4xl mx-auto text-white">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-          Nos Réalisations
-        </h1>
-        <p class="text-xl md:text-2xl text-gray-200 leading-relaxed">
-          Découvrez les projets qui transforment la participation citoyenne au Sénégal. De la conception à la mise en œuvre, chaque réalisation reflète notre engagement pour l'innovation sociale.
-        </p>
-        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="/projets"
-            class="px-8 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-          >
-            Voir nos projets
-          </a>
-          <a
-            href="/contact"
-            class="px-8 py-3 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-colors"
-          >
-            Nous contacter
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats Section -->
-  <Stats
-    title="Notre impact en chiffres"
-    stats={[
-      { title: 'Projets réalisés', amount: statsData.projetsRealises.toString() },
-      { title: 'Citoyens engagés', amount: statsData.citoyensEngages },
-      { title: 'Partenaires', amount: statsData.partenaires },
-      { title: 'Années d\'expérience', amount: statsData.anneesExperience },
-    ]}
+  <!-- Banner -->
+  <PageBanner
+    image={RealisationsImg}
+    alt="Nos Réalisations"
+    label="Réalisations"
+    title="Nos Réalisations"
+    description="Découvrez les projets qui transforment la participation citoyenne au Sénégal. Chaque réalisation reflète notre engagement pour l'innovation sociale."
   />
 
-  <!-- Projects Grid -->
-  <section id="projets" class="px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
-    <div class="mb-12 text-center">
-      <h2 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter mb-4 font-heading">
-        Projets marquants
+  <!-- Grille des réalisations -->
+  <section id="projets" class="bg-white/80 backdrop-blur-sm py-16 px-6 lg:px-8 mx-auto max-w-7xl">
+    <div class="mb-10 flex flex-col items-center gap-4">
+      <h2 class="text-2xl md:text-3xl text-center font-bold text-gray-900">
+        Projets realisés
       </h2>
-      <p class="text-xl text-muted dark:text-slate-400 max-w-3xl mx-auto">
+      <p class="text-mutad-foreground text-gray-500 text-center max-w-xl mx-auto">
         Une sélection de nos réalisations les plus impactantes
       </p>
+
+      <div class="h-[3px] w-20 bg-gradient-to-r from-green-600 to-green-400 rounded-full"></div>
     </div>
 
-    {Object.keys(projetsData).length === 0 ? (
+    {projets.length === 0 ? (
       <div class="text-center py-12">
-        <div class="max-w-md mx-auto">
-          <svg class="w-24 h-24 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <p class="text-xl text-gray-600 dark:text-gray-400 mb-2">
-            Aucune réalisation disponible pour le moment.
-          </p>
-          <p class="text-sm text-gray-500 dark:text-gray-500">
-            Nos projets seront bientôt publiés. Revenez plus tard !
-          </p>
-        </div>
+        <p class="text-sm text-gray-400 mb-1">Aucune réalisation disponible pour le moment.</p>
+        <p class="text-xs text-gray-300">Nos projets seront bientôt publiés.</p>
       </div>
     ) : (
-      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {Object.entries(projetsData).map(([id, projet]) => (
-          <article
-            class="project-card group relative overflow-hidden rounded-lg bg-white dark:bg-slate-900 shadow-lg transition-all hover:shadow-2xl"
-          >
-            <div class="relative h-64 overflow-hidden">
-              <img
-                src={projet.heroImage}
-                alt={projet.title}
-                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                loading="lazy"
-                onerror="this.src='/assets/images/default.png'"
-              />
-              {/* <div class="absolute top-4 right-4">
-                <span class="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full">
-                  {projet.category}
-                </span>
-              </div> */}
-            </div>
-
-            <div class="p-6">
-              <h3 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
-                {projet.title}
-              </h3>
-
-              <p class="text-muted dark:text-slate-400 mb-4 line-clamp-2">
-                {projet.description}
-              </p>
-
-              <div class="space-y-2 mb-4 text-sm">
-                {/* <div class="flex items-center text-gray-600 dark:text-gray-400">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span class="font-semibold mr-2">Client:</span>
-                  <span class="truncate">{projet.client}</span>
-                </div> */}
-                <div class="flex items-center text-gray-600 dark:text-gray-400">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span class="font-semibold mr-2">Date:</span>
-                  <span>{projet.date}</span>
+      <>
+        <div class="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3" id="realisations-grid">
+          {projets.map((projet, index) => (
+            <a
+              href={`/realisations/${projet.id}`}
+              class:list={[
+                "realisation-card block h-full",
+                { "hidden": index >= 6 }
+              ]}
+              data-index={index}
+            >
+              <article class="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-gray-100 hover:border-green-200 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                <div class="relative h-44 overflow-hidden">
+                  <img
+                    src={projet.image}
+                    alt={projet.title}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                    onerror="this.src='/assets/images/default.png'"
+                  />
+                  <span class="absolute top-3 left-3 bg-green-600 text-white text-[10px] font-semibold uppercase tracking-wide px-3 py-1 rounded-full">
+                    {projet.category}
+                  </span>
                 </div>
-                {/* <div class="flex items-start text-gray-600 dark:text-gray-400">
-                  <svg class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <div>
-                    <span class="font-semibold mr-2">Impact:</span>
-                    <span class="line-clamp-2">{projet.results[0]}</span>
-                  </div>
-                </div> */}
-              </div>
-              
-              {/* <div class="flex flex-wrap gap-2 mb-4">
-                {projet.technologies.slice(0, 3).map((tech) => (
-                  <span class="px-2 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 text-xs rounded">
-                    {tech}
-                  </span>
-                ))}
-                {projet.technologies.length > 3 && (
-                  <span class="px-2 py-1 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400 text-xs rounded">
-                    +{projet.technologies.length - 3}
-                  </span>
-                )}
-              </div> */}
 
-              <a
-                href={`/realisations/${id}`}
-                class="inline-flex items-center text-primary font-semibold hover:underline group-hover:translate-x-1 transition-transform"
-              >
-                Voir le projet
-                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-            </div>
-          </article>
-        ))}
-      </div>
+                <div class="p-5 flex flex-col flex-1">
+                  <span class="text-xs text-gray-400 mb-2">{projet.date}</span>
+
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 line-clamp-3 group-hover:text-green-800 transition-colors">
+                    {projet.title}
+                  </h3>
+
+                  <p class="text-sm text-gray-500 dark:text-slate-400 leading-relaxed line-clamp-3 flex-1">
+                    {projet.description}
+                  </p>
+
+                  <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-50">
+                    <span class="text-xs font-medium text-green-700">Voir le projet</span>
+                    <span class="inline-flex items-center justify-center w-7 h-7 bg-green-50 group-hover:bg-green-600 rounded-full transition-all duration-300">
+                      <FaArrowRight className="w-3 h-3 text-green-600 group-hover:text-white transition-colors" />
+                    </span>
+                  </div>
+                </div>
+              </article>
+            </a>
+          ))}
+        </div>
+
+        <!-- Compteur + voir plus -->
+        <div class="py-8 flex flex-col items-center gap-3">
+          <p class="text-xs text-gray-400">
+            <span id="realisations-shown">{Math.min(6, projets.length)}</span> sur {projets.length} réalisations
+          </p>
+          {projets.length > 6 && (
+            <button
+              id="load-more-realisations"
+              class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold border border-green-600 text-green-600 hover:bg-green-600 hover:text-white rounded-lg transition-colors duration-300"
+            >
+              Voir plus de réalisations
+            </button>
+          )}
+        </div>
+      </>
     )}
+
+    <!-- CTA -->
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-700 to-green-800">
+        <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/5"></div>
+        <div class="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-white/[0.03]"></div>
+
+        <div class="relative z-10 px-6 md:px-12 py-12 md:py-14 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div class="max-w-xl">
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">
+              Découvrez nos projets en cours
+            </h2>
+            <p class="text-mutad-foreground text-green-200 leading-relaxed">
+              Projets actuellement en développement pour une transformation continue.
+            </p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3 shrink-0">
+            <a
+              href="/projets"
+              class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-green-800 text-sm font-semibold rounded-lg hover:bg-green-50 transition-colors"
+            >
+              Voir nos projets
+              <FaArrowRightLong className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="/contact"
+              class="inline-flex items-center justify-center gap-2 px-6 py-2.5 border border-white/30 text-white text-sm font-semibold rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Nous contacter
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- Process Section -->
-  <!-- <Features3
-    title="Notre processus de réalisation"
-    subtitle="Une approche éprouvée pour des projets réussis"
-    columns={4}
-    items={[
-      {
-        title: 'Découverte',
-        description: 'Analyse des besoins et co-conception avec les parties prenantes',
-        icon: 'tabler:search',
-      },
-      {
-        title: 'Développement',
-        description: 'Création de solutions adaptées avec des technologies modernes',
-        icon: 'tabler:code',
-      },
-      {
-        title: 'Déploiement',
-        description: 'Mise en production et formation des utilisateurs',
-        icon: 'tabler:rocket',
-      },
-      {
-        title: 'Suivi',
-        description: 'Accompagnement et amélioration continue',
-        icon: 'tabler:chart-line',
-      },
-    ]}
-  /> -->
-
-  <!-- Call to Action -->
-  <CallToAction
-    title="Découvrez nos réalisations en cours"
-    subtitle="Projets actuellement en développement et accompagnement pour une transformation continue"
-    actions={[
-      {
-        variant: 'primary',
-        text: 'Voir nos projets en cours',
-        href: '#projets',
-      },
-      {
-        text: 'Nous contacter',
-        href: '/contact',
-      },
-    ]}
-  />
+  
 </Layout>
 
-<style>
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('load-more-realisations');
+    const counter = document.getElementById('realisations-shown');
+    const cards = document.querySelectorAll('.realisation-card');
+    const step = 6;
+    let visible = Math.min(step, cards.length);
 
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+    if (!btn) return;
 
-  .line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+    btn.addEventListener('click', () => {
+      const next = Math.min(visible + step, cards.length);
 
-  .project-card {
-    animation: fadeIn 0.6s ease-out forwards;
-  }
+      for (let i = visible; i < next; i++) {
+        cards[i].classList.remove('hidden');
+      }
 
-  .project-card:nth-child(1) { animation-delay: 0.1s; }
-  .project-card:nth-child(2) { animation-delay: 0.2s; }
-  .project-card:nth-child(3) { animation-delay: 0.3s; }
-  .project-card:nth-child(4) { animation-delay: 0.4s; }
-  .project-card:nth-child(5) { animation-delay: 0.5s; }
-  .project-card:nth-child(6) { animation-delay: 0.6s; }
-</style>
+      visible = next;
+      if (counter) counter.textContent = String(visible);
+
+      if (visible >= cards.length) {
+        btn.style.display = 'none';
+      }
+    });
+  });
+</script>

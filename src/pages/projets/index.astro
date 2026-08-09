@@ -1,37 +1,44 @@
 ---
-import Layout from '~/layouts/PageLayout.astro';
-import { Image } from 'astro:assets';
-import { Fragment } from 'astro/jsx-runtime';
-import etapeProjetImage from '~/assets/images/lesetapes.png';
-import defaultImg from '~/assets/images/default.png';
-import projetcours from '~/assets/images/projetencours.png';
-import { getAllProjets } from '~/utils/api';
+import Layout from "~/layouts/PageLayout.astro";
+import PageBanner from "~/components/widgets/PageBanner.astro";
+import { Image } from "astro:assets";
+import defaultImg from "~/assets/images/default.png";
+import projetcours from "~/assets/images/projetencours.png";
+import { getAllProjets } from "~/utils/api";
+import {
+  FaCompass,
+  FaUsers,
+  FaCubes,
+  FaFlask,
+  FaSyncAlt,
+  FaRocket,
+  FaArrowRight,
+} from "react-icons/fa";
+
+import { FaArrowRightLong } from "react-icons/fa6";
 
 const metadata = {
   title: "Projets - AfricTivistes CitizenLab Sénégal",
-  description: "Découvrez nos projets en cours, nos prototypes et nos impacts sur le terrain pour renforcer la participation citoyenne au Sénégal.",
+  description:
+    "Découvrez nos projets en cours, nos prototypes et nos impacts sur le terrain pour renforcer la participation citoyenne au Sénégal.",
   ignoreTitleTemplate: true,
 };
 
-// Récupération des projets depuis WordPress
 const wpProjets = await getAllProjets();
 
-// Transformation des données WordPress vers le format UI
 const projets = wpProjets.map((post: any, index: number) => {
-  // Nettoyer l'excerpt des balises HTML
   const cleanDescription =
     post.excerpt
-      ?.replace(/<[^>]*>/g, "") // Supprime toutes les balises HTML
-      ?.replace(/&nbsp;/g, " ") // Remplace les espaces insécables
-      ?.replace(/&#8230;/g, "...") // Remplace les entités HTML
-      ?.trim() || ""; // Supprime les espaces au début et à la fin
+      ?.replace(/<[^>]*>/g, "")
+      ?.replace(/&nbsp;/g, " ")
+      ?.replace(/&#8230;/g, "...")
+      ?.trim() || "";
 
   return {
     slug: post.slug,
     titre: post.title,
     description: cleanDescription,
     categorie: post.categories?.nodes?.[0]?.name ?? "Projet",
-    statut: "En cours",
     statutDetail: post.categories?.nodes?.[1]?.name ?? "En développement",
     image: post.featuredImage?.node?.mediaItemUrl || defaultImg,
     imagePosition: index % 2 === 0 ? "left" : "right",
@@ -43,257 +50,280 @@ const projets = wpProjets.map((post: any, index: number) => {
   };
 });
 
-// Configuration de la pagination (optionnel)
-const projetsParPage = 6; // Nombre de projets à afficher par page
-const pageActuelle = 1; // Page actuelle (peut être dynamique)
-
-const projetsAffiches = projets; // Afficher tous les projets pour l'instant
-
-// Étapes du projet selon le design Figma
 const etapes = [
-  "Exploration",
-  "Co-conception",
-  "Prototypage",
-  "Test sur le terrain",
-  "Amélioration",
-  "Pré-déploiement",
+  {
+    nom: "Exploration",
+    description: "Analyse des besoins et du contexte",
+    icon: FaCompass,
+  },
+  {
+    nom: "Co-conception",
+    description: "Conception collaborative avec les parties prenantes",
+    icon: FaUsers,
+  },
+  {
+    nom: "Prototypage",
+    description: "Création de la première version du projet",
+    icon: FaCubes,
+  },
+  {
+    nom: "Test terrain",
+    description: "Validation avec les communautés ciblées",
+    icon: FaFlask,
+  },
+  {
+    nom: "Amélioration",
+    description: "Itération basée sur les retours",
+    icon: FaSyncAlt,
+  },
+  {
+    nom: "Pré-déploiement",
+    description: "Préparation au lancement à grande échelle",
+    icon: FaRocket,
+  },
 ];
 ---
 
 <Layout metadata={metadata}>
-  <!-- Hero Banner avec image de fond -->
-  <section class="relative isolate overflow-hidden">
-    <div class="absolute inset-0">
-      <Image
-        src={projetcours}
-        alt="Bannière Projets"
-        width={1920}
-        height={800}
-        class="h-full w-full object-cover"
-      />
-    </div>
-    <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/40"></div>
-    
-    <!-- Contenu de la bannière -->
-    <div class="relative z-30 mx-auto flex max-w-7xl flex-col gap-6 px-4 py-32 text-white sm:px-6 lg:px-8">
-      <h1 class="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
-        Des solutions innovantes pour renforcer la participation citoyenne
-      </h1>
-      <p class="max-w-5xl text-lg text-slate-100 sm:text-xl">
-        Chez CitizenLab, nous développons et expérimentons des solutions innovantes pour renforcer la participation 
-        citoyenne, améliorer la transparence publique et favoriser la collaboration entre communautés, institutions 
-        et acteurs sociaux.
-      </p>
-    </div>
-  </section>
+  <!-- Banner -->
+  <PageBanner
+    image={projetcours}
+    alt="Projets CitizenLab Sénégal"
+    label="Nos projets"
+    title="Des solutions innovantes pour renforcer la participation citoyenne"
+    description="Nous développons et expérimentons des outils numériques pour améliorer la transparence publique et favoriser la collaboration entre communautés et institutions."
+  />
 
-  <!-- Introduction Section -->
-  <section class="bg-white py-8 sm:py-12">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <p class="text-xl md:text-2xl leading-relaxed text-black">
-        Chez CitizenLab, nous développons et expérimentons des solutions innovantes pour renforcer la participation 
-        citoyenne, améliorer la transparence publique et favoriser la collaboration entre communautés, institutions 
-        et acteurs sociaux. Découvrez nos projets en cours, nos prototypes et nos impacts sur le terrain.
-      </p>
-    </div>
-  </section>
-
-  <!-- Étapes du projet Section -->
-  <section class="bg-white py-8 sm:py-12">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <p class="text-xl md:text-2xl leading-relaxed text-black mb-6">
-        Chaque projet passe par plusieurs étapes :
-      </p>
-      <div class="mb-6">
-        <Image
-          src={etapeProjetImage}
-          alt="Étapes du projet"
-          class="w-full h-auto"
-        />
-      </div>
-      <div class="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4">
-        {etapes.map((etape, index) => (
-          <Fragment>
-            <span class="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-black leading-tight whitespace-nowrap">
-              {etape}
+  <!-- Étapes -->
+  <section class="bg-white/80 backdrop-blur-sm">
+    <div class="py-14">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div
+          class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10"
+        >
+          <div>
+            <span
+              class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 uppercase tracking-widest mb-2"
+            >
+              Méthodologie
             </span>
-            {index < etapes.length - 1 && (
-              <span class="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-black leading-tight">
-                →
-              </span>
-            )}
-          </Fragment>
-        ))}
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900">
+              Les étapes de <span class="text-green-600">chaque projet</span>
+            </h2>
+          </div>
+          <p
+            class="text-mutad-foreground text-gray-500 md:text-right md:max-w-xs leading-relaxed"
+          >
+            Un processus structuré de l'idée au déploiement
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {
+            etapes.map((etape, index) => (
+              <div class="relative flex flex-col items-center text-center">
+                <div class="w-12 h-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-green-700 mb-3">
+                  <etape.icon className="w-5 h-5" />
+                </div>
+                <span class="text-sm font-medium text-green-800 bg-green-50 px-2 py-0.5 rounded-full mb-1.5">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 class="text-sm font-semibold text-gray-900 mb-1">
+                  {etape.nom}
+                </h3>
+                <p class="text-sm text-gray-500 leading-relaxed text-center">
+                  {etape.description}
+                </p>
+              </div>
+            ))
+          }
+        </div>
       </div>
     </div>
-  </section>
 
-  <!-- Projets en cours Section -->
-  <section class="bg-gray-50 py-8 sm:py-12">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="mb-8">
-        <h2 class="text-4xl font-bold text-black mb-3">Projets en cours</h2>
-        <div class="h-1 w-32 bg-primary mb-4"></div>
-        <p class="text-xl md:text-2xl text-black leading-relaxed">
-          CitizenLab mène actuellement plusieurs projets pilotes, axés sur le numérique, la participation citoyenne, 
-          l'environnement, la transparence publique et l'innovation sociale. Chaque projet est toujours en évolution 
-          et inclut des phases de prototypage, de test et de validation avec les communautés.
-        </p>
-      </div>
+    <!-- Projets en cours -->
+    <div class="py-16">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mb-10 flex flex-col items-center justify-center space-y-4">
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-900">
+            Projets en cours
+          </h2>
+          <p
+            class="text-mutad-foreground text-gray-500 max-w-3xl leading-relaxed text-center"
+          >
+            CitizenLab Sénégal mène actuellement plusieurs projets pilotes axés
+            sur le numérique, la participation citoyenne, l'environnement et
+            l'innovation sociale.
+          </p>
+          <div
+            class="h-[3px] w-20 bg-gradient-to-r from-green-600 to-green-400 rounded-full mb-4"
+          >
+          </div>
+        </div>
 
-      <!-- Grille des projets -->
-      <div class="space-y-10">
-        {projetsAffiches.map((projet, index) => (
-          <div class="relative overflow-hidden rounded-lg bg-white shadow-lg my-4" style="border-radius: 7px;" data-projet-index={index}>
-            <div class="flex flex-col lg:flex-row">
-              <!-- Image du projet avec borderRadius spécifique selon position -->
-              <div class={`relative h-64 lg:h-auto lg:w-1/2 overflow-hidden ${
-                projet.imagePosition === "left" 
-                  ? "rounded-tl-[47px]" 
-                  : "rounded-tr-[47px] lg:order-2"
-              }`}>
-                {typeof projet.image === 'string' ? (
-                  <img
-                    src={projet.image}
-                    alt={projet.titre}
-                    class="h-full w-full object-cover"
-                  />
-                ) : (
-                  <Image
-                    src={projet.image}
-                    alt={projet.titre}
-                    width={600}
-                    height={400}
-                    class="h-full w-full object-cover"
-                  />
-                )}
-              </div>
-
-              <!-- Contenu du projet -->
-              <div class={`flex-1 p-8 bg-white ${
-                projet.imagePosition === "left" 
-                  ? "rounded-br-[47px] rounded-bl-[47px]" 
-                  : "rounded-bl-[47px] rounded-br-[47px] lg:order-1"
-              }`}>
-                <!-- Titre -->
-                <h3 class="text-3xl md:text-4xl font-bold text-black mb-4">{projet.titre}</h3>
-                
-                <!-- Description -->
-                <p class="text-lg md:text-xl text-gray-700 mb-6 leading-relaxed">{projet.description}</p>
-
-                <!-- Statut détaillé -->
-                <p class="text-base md:text-lg text-gray-600 mb-6">Statut : {projet.statutDetail}</p>
-                
-                <!-- Bouton Découvrir -->
-                <div class="flex items-center gap-4 flex-wrap">
+        {
+          projets.length === 0 ? (
+            <div class="text-center py-12">
+              <p class="text-sm text-gray-400">
+                Aucun projet disponible pour le moment.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+                id="projets-grid"
+              >
+                {projets.map((projet: any, index: number) => (
                   <a
                     href={`/projets/${projet.slug}`}
-                    class="inline-flex items-center rounded-lg bg-white border-2 border-primary px-6 py-2 text-lg md:text-xl font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-white"
-                    style="border-radius: 10px;"
+                    class:list={[
+                      "projet-card block h-full",
+                      { hidden: index >= 6 },
+                    ]}
+                    data-index={index}
                   >
-                    Découvrir
-                    <span class="ml-2">→</span>
+                    <article class="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-green-200 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                      <div class="relative h-44 overflow-hidden">
+                        {typeof projet.image === "string" ? (
+                          <img
+                            src={projet.image}
+                            alt={projet.titre}
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <Image
+                            src={projet.image}
+                            alt={projet.titre}
+                            width={400}
+                            height={250}
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        )}
+                        <span class="absolute top-3 left-3 bg-green-600 text-white text-[10px] font-semibold uppercase tracking-wide px-3 py-1 rounded-full">
+                          {projet.categorie}
+                        </span>
+                      </div>
+
+                      <div class="p-5 flex flex-col flex-1">
+                        <span class="text-xs text-gray-400 mb-2">
+                          {projet.date}
+                        </span>
+
+                        <h3 class="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-800 transition-colors">
+                          {projet.titre}
+                        </h3>
+
+                        <p class="text-sm text-gray-500 leading-relaxed line-clamp-3 flex-1">
+                          {projet.description}
+                        </p>
+
+                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-50">
+                          <span class="inline-flex items-center text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full">
+                            {projet.statutDetail}
+                          </span>
+                          <span class="inline-flex items-center justify-center w-7 h-7 bg-green-50 group-hover:bg-green-600 rounded-full transition-all duration-300">
+                            <FaArrowRight className="w-3 h-3 text-green-600 group-hover:text-white transition-colors" />
+                          </span>
+                        </div>
+                      </div>
+                    </article>
                   </a>
-                </div>
+                ))}
               </div>
-            </div>
-          </div>
-        ))}
+
+              {/* Compteur + bouton voir plus */}
+              <div class="mt-8 flex flex-col items-center gap-3">
+                <p class="text-xs text-gray-400">
+                  <span id="projets-shown">{Math.min(6, projets.length)}</span>{" "}
+                  sur {projets.length} projets
+                </p>
+                {projets.length > 6 && (
+                  <button
+                    id="load-more-btn"
+                    class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold border border-green-600 text-green-600 hover:bg-green-600 hover:text-white rounded-lg transition-colors duration-300"
+                  >
+                    Voir plus de projets
+                  </button>
+                )}
+              </div>
+            </>
+          )
+        }
       </div>
 
-      <!-- Pagination (affichée seulement si plus de projets que la limite) -->
-      {projets.length > projetsParPage && (
-        <div class="mt-12 flex justify-center items-center gap-4">
-          <button 
-            class="px-4 py-2 rounded-lg border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            id="prevPage"
-            disabled={pageActuelle === 1}
+      <!-- CTA -->
+      <div class="max-w-7xl mx-auto px-6 lg:px-8 mt-10">
+        <div
+          class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-700 to-green-800"
+        >
+          <div
+            class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/5"
           >
-            Précédent
-          </button>
-          
-          <span class="text-gray-700 font-medium">
-            Page {pageActuelle} sur {Math.ceil(projets.length / projetsParPage)}
-          </span>
-          
-          <button 
-            class="px-4 py-2 rounded-lg border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            id="nextPage"
-            disabled={pageActuelle >= Math.ceil(projets.length / projetsParPage)}
+          </div>
+          <div
+            class="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-white/[0.03]"
           >
-            Suivant
-          </button>
-        </div>
-      )}
+          </div>
 
-      <!-- Message si aucun projet -->
-      {projets.length === 0 && (
-        <div class="text-center py-12">
-          <p class="text-lg text-gray-600">Aucun projet disponible pour le moment.</p>
+          <div
+            class="relative z-10 px-6 md:px-12 py-12 md:py-14 flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+          >
+            <div class="max-w-xl">
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">
+                Découvrez nos projets réalisés
+              </h2>
+              <p class="text-mutad-foreground text-green-200 leading-relaxed">
+                Projets realisés par CitizenLab Sénégal et partenaires.
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 shrink-0">
+              <a
+                href="/realisations"
+                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-green-800 text-sm font-semibold rounded-lg hover:bg-green-50 transition-colors"
+              >
+                Voir nos projets
+                <FaArrowRightLong className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="/contact"
+                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 border border-white/30 text-white text-sm font-semibold rounded-lg hover:bg-white/10 transition-colors"
+              >
+                Nous contacter
+              </a>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   </section>
-
 </Layout>
 
 <script>
-  // Script pour gérer la pagination côté client (optionnel)
-  // Pour activer la pagination, décommentez le code ci-dessous et modifiez projetsAffiches dans le frontmatter
-  
-  // document.addEventListener('DOMContentLoaded', function() {
-  //   const prevButton = document.getElementById('prevPage');
-  //   const nextButton = document.getElementById('nextPage');
-  //   const projets = document.querySelectorAll('[data-projet-index]');
-  //   let currentPage = 1;
-  //   const itemsPerPage = 6;
-  //   const totalPages = Math.ceil(projets.length / itemsPerPage);
-  //
-  //   function showPage(page) {
-  //     const start = (page - 1) * itemsPerPage;
-  //     const end = start + itemsPerPage;
-  //     
-  //     projets.forEach((projet, index) => {
-  //       if (index >= start && index < end) {
-  //         projet.style.display = 'block';
-  //       } else {
-  //         projet.style.display = 'none';
-  //       }
-  //     });
-  //     
-  //     if (prevButton) prevButton.disabled = page === 1;
-  //     if (nextButton) nextButton.disabled = page >= totalPages;
-  //   }
-  //
-  //   if (prevButton) {
-  //     prevButton.addEventListener('click', () => {
-  //       if (currentPage > 1) {
-  //         currentPage--;
-  //         showPage(currentPage);
-  //       }
-  //     });
-  //   }
-  //
-  //   if (nextButton) {
-  //     nextButton.addEventListener('click', () => {
-  //       if (currentPage < totalPages) {
-  //         currentPage++;
-  //         showPage(currentPage);
-  //       }
-  //     });
-  //   }
-  //
-  //   // Afficher la première page
-  //   showPage(1);
-  // });
-</script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("load-more-btn");
+    const counter = document.getElementById("projets-shown");
+    const cards = document.querySelectorAll(".projet-card");
+    const step = 6;
+    let visible = Math.min(step, cards.length);
 
-<style>
-  /* Styles spécifiques pour correspondre au design Figma */
-  @font-face {
-    font-family: 'Inknut Antiqua';
-    font-style: normal;
-    font-weight: 700;
-    src: url('https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@700&display=swap');
-  }
-</style>
+    if (!btn) return;
+
+    btn.addEventListener("click", () => {
+      const next = Math.min(visible + step, cards.length);
+
+      for (let i = visible; i < next; i++) {
+        cards[i].classList.remove("hidden");
+      }
+
+      visible = next;
+      if (counter) counter.textContent = String(visible);
+
+      if (visible >= cards.length) {
+        btn.style.display = "none";
+      }
+    });
+  });
+</script>

@@ -1,11 +1,12 @@
 ---
-import Layout from '~/layouts/Layout.astro';
-import Header from '~/components/widgets/Header.astro';
-import Footer from '~/components/widgets/Footer.astro';
+import Layout from "~/layouts/Layout.astro";
+import Header from "~/components/widgets/Header.astro";
+import Footer from "~/components/widgets/Footer.astro";
+import AfricaImg from "~/assets/images/acls_bg.png";
 
-import { headerData, footerData } from '~/navigation';
+import { headerData, footerData } from "~/navigation";
 
-import type { MetaData } from '~/types';
+import type { MetaData } from "~/types";
 
 export interface Props {
   metadata?: MetaData;
@@ -16,11 +17,21 @@ const { metadata } = Astro.props;
 
 <Layout metadata={metadata}>
   <slot name="header">
-    <Header {...headerData} isSticky showRssFeed showToggleTheme />
+    <Header {...({ ...headerData, isSticky: true, showRssFeed: true, showToggleTheme: true } as any)} />
   </slot>
-  <main>
+
+  <main
+    class="
+           bg-fixed
+           bg-cover
+           bg-center
+           bg-no-repeat"
+    
+  style={`background-image: url(${AfricaImg.src});`}       
+  >
     <slot />
   </main>
+
   <slot name="footer">
     <Footer {...footerData} />
   </slot>

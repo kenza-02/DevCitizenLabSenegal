@@ -1,0 +1,314 @@
+---
+import Layout from "~/layouts/PageLayout.astro";
+import { getAllFormations } from "~/utils/api.js";
+import { FaArrowLeft, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt, FaUserTie, FaTag, FaFacebookF, FaLinkedinIn, FaWhatsapp, FaLink } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+
+export async function getStaticPaths() {
+  const wpFormations = await getAllFormations();
+
+  return wpFormations.map((post: any) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props as { post: any };
+
+if (!post) {
+  throw new Error("Formation introuvable");
+}
+
+const formation = {
+  slug: post.slug,
+  image: post.featuredImage?.node?.mediaItemUrl ?? null,
+  nom: post.formation?.nom ?? "",
+  description: post.formation?.description ?? "",
+  lieu: post.formation?.lieu ?? "",
+  date: post.formation?.date
+    ? new Date(post.formation.date).toLocaleDateString("fr-FR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "",
+  formateur: post.formation?.formateur ?? "",
+  profession: post.formation?.profession ?? "",
+  duree: post.formation?.duree ?? "",
+  places: post.formation?.places ?? "",
+  lien: post.formation?.lien?.url ?? null,
+  prix: post.formation?.prix ?? "",
+  status: Array.isArray(post.formation?.statut)
+    ? post.formation.statut[0]
+    : post.formation?.statut ?? "",
+};
+
+const metadata = {
+  title: `${formation.nom} — Formations`,
+};
+
+function getStatusClasses(status: string) {
+  switch(status) {
+    case "Inscriptions ouvertes":
+      return "bg-green-50 text-green-700 border-green-200";
+    case "Complet":
+      return "bg-orange-50 text-orange-700 border-orange-200";
+    case "Terminée":
+      return "bg-red-50 text-red-700 border-red-200";
+    default:
+      return "bg-gray-50 text-gray-600 border-gray-200";
+  }
+}
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || '';
+const pageUrl = `${siteUrl}/formations/${formation.slug}`;
+const encodedUrl = encodeURIComponent(pageUrl);
+const encodedTitle = encodeURIComponent(formation.nom);
+
+const shareLinks = {
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+  twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+  whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
+};
+
+const infos = [
+  { label: "Date", value: formation.date, icon: FaCalendarAlt },
+  { label: "Lieu", value: formation.lieu, icon: FaMapMarkerAlt },
+  { label: "Formateur", value: formation.formateur, icon: FaUserTie },
+  { label: "Prix", value: formation.prix, icon: FaTag },
+].filter(i => i.value);
+---
+
+<Layout metadata={metadata}>
+  <main class="py-12 bg-[#fcfcfc]/80 backdrop-blur-sm">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+
+      <!-- Retour -->
+      <a
+        href="/formations"
+        class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-800 transition-colors mb-8"
+      >
+        <FaArrowLeft className="w-3 h-3" />
+        Retour aux formations
+      </a>
+
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          {formation.status && (
+            <span class={`text-sm font-semibold border px-2.5 py-0.5 rounded-full ${getStatusClasses(formation.status)}`}>
+              {formation.status}
+            </span>
+          )}
+        </div>
+
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 leading-tight">
+          {formation.nom}
+        </h1>
+
+        <!-- Partage rapide -->
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs text-gray-400 mr-0.5">Partager</span>
+          <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="Facebook">
+            <FaFacebookF className="w-3 h-3" />
+          </a>
+          <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="X">
+            <FaXTwitter className="w-3 h-3" />
+          </a>
+          <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="LinkedIn">
+            <FaLinkedinIn className="w-3 h-3" />
+          </a>
+          <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" class="share-icon-btn" aria-label="WhatsApp">
+            <FaWhatsapp className="w-3.5 h-3.5" />
+          </a>
+          <button id="copy-link-top" class="share-icon-btn" aria-label="Copier le lien">
+            <FaLink className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Image -->
+      {formation.image && (
+        <div class="mb-8">
+          <img
+            src={formation.image}
+            alt={formation.nom}
+            class="w-full h-auto rounded-2xl"
+          />
+        </div>
+      )}
+
+      <!-- Infos clés -->
+      {infos.length > 0 && (
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {infos.map((info) => {
+            const InfoIcon = info.icon;
+            return (
+              <div class="bg-white border border-gray-100 rounded-xl p-4 flex flex-col items-start gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-50 border border-green-100 flex items-center justify-center text-green-700">
+                  <InfoIcon className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <p class="text-[10px] text-gray-400 uppercase tracking-wide">{info.label}</p>
+                  <p class="text-sm font-medium text-gray-900">{info.value}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <!-- Infos complémentaires -->
+      {(formation.duree || formation.places || formation.profession) && (
+        <div class="flex flex-wrap gap-2 mb-8">
+          {formation.duree && (
+            <span class="text-xs text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full">
+              Durée : {formation.duree}
+            </span>
+          )}
+          {formation.places && (
+            <span class="text-xs text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full">
+              Places : {formation.places}
+            </span>
+          )}
+          {formation.profession && (
+            <span class="text-xs text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full">
+              {formation.profession}
+            </span>
+          )}
+        </div>
+      )}
+
+      <!-- Description -->
+      <div class="mb-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-3">À propos de cette formation</h2>
+        <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+          {formation.description}
+        </p>
+      </div>
+
+      <!-- CTA inscription -->
+      {formation.status === "Inscriptions ouvertes" && formation.lien && (
+        <div class="relative overflow-hidden bg-gradient-to-br from-green-700 to-green-800 rounded-2xl p-6 md:p-8 mb-8">
+          <div class="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-white/5"></div>
+          <div class="absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-white/[0.03]"></div>
+
+          <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h3 class="text-lg font-bold text-white mb-1">Intéressé par cette formation ?</h3>
+              <p class="text-sm text-green-200">Les inscriptions sont ouvertes, rejoignez-nous !</p>
+            </div>
+            <a
+              href={formation.lien}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-green-800 text-sm font-semibold rounded-lg hover:bg-green-50 transition-colors shrink-0"
+            >
+              S'inscrire
+              <FaArrowRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+      )}
+
+      <!-- Partage bas -->
+      <div class="border-t border-gray-100 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <span class="text-sm font-semibold text-gray-900">Partager cette formation</span>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaFacebookF className="w-3 h-3" />
+            Facebook
+          </a>
+          <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaWhatsapp className="w-3.5 h-3.5" />
+            WhatsApp
+          </a>
+          <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaXTwitter className="w-3 h-3" />
+            Twitter
+          </a>
+          <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" class="share-pill-btn">
+            <FaLinkedinIn className="w-3 h-3" />
+            LinkedIn
+          </a>
+          <button id="copy-link-bottom" class="share-pill-btn">
+            <FaLink className="w-3 h-3" />
+            <span class="copy-label">Copier</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .share-icon-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    background: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .share-icon-btn:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+  }
+
+  .share-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .share-pill-btn:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+  }
+</style>
+
+<script define:vars={{ pageUrl }}>
+  function copyToClipboard(buttonId) {
+    const btn = document.getElementById(buttonId);
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pageUrl).then(() => {
+        const label = btn.querySelector('.copy-label');
+        if (label) {
+          label.textContent = 'Copié !';
+          setTimeout(() => { label.textContent = 'Copier'; }, 2000);
+        } else {
+          btn.style.borderColor = '#16a34a';
+          btn.style.color = '#166534';
+          setTimeout(() => {
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }, 2000);
+        }
+      });
+    });
+  }
+
+  copyToClipboard('copy-link-top');
+  copyToClipboard('copy-link-bottom');
+</script>

@@ -1,0 +1,188 @@
+---
+import Layout from "~/layouts/PageLayout.astro";
+import PageBanner from "~/components/widgets/PageBanner.astro";
+import { getAllVideos } from "~/utils/api";
+import { FaPlay } from "react-icons/fa";
+import videoBg from "~/assets/images/video.png";
+
+const posts = await getAllVideos();
+
+const metadata = {
+  title: "Vidéos - CitizenLab Sénégal",
+};
+
+const videos = posts.map((post: any) => ({
+  slug: post.slug,
+  title: post.title,
+  description: post.excerpt?.replace(/<[^>]+>/g, "").trim() || "",
+  date: new Date(post.date).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }),
+  image: post.featuredImage?.node?.mediaItemUrl ?? "",
+}));
+
+const featured = videos.length > 0 ? videos[0] : null;
+const otherVideos = videos.slice(1);
+---
+
+<Layout metadata={metadata}>
+  <PageBanner
+    image={videoBg}
+    alt="Vidéos CitizenLab"
+    label="Vidéos"
+    title="Nos Vidéos"
+    description="Revivez nos événements et découvrez nos reportages sur la participation citoyenne."
+  />
+
+  <section class="py-16 bg-white/90 backdrop-blur-sm">
+
+    <!-- Header -->
+    <div class="flex flex-col items-center justify-center gap-4 mb-10">
+      <div class="text-center">
+        <h2 class="text-2xl text-center md:text-3xl lg:text-4xl font-bold text-gray-900">
+          Nos dernières vidéos
+        </h2>
+      </div>
+      
+        <div class="mx-auto h-1 w-20 rounded-full bg-green-500"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+
+      {videos.length === 0 ? (
+        <p class="text-center text-sm text-gray-400 py-10">
+          Aucune vidéo disponible pour le moment.
+        </p>
+      ) : (
+        <>
+          {/* Vidéo en vedette */}
+          {featured && (
+            <a href={`/videos/${featured.slug}`} class="block relative rounded-2xl overflow-hidden min-h-[280px] md:min-h-[360px] flex flex-col justify-end mb-8 group">
+              {featured.image ? (
+                <img
+                  src={featured.image}
+                  alt={featured.title}
+                  class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <div class="absolute inset-0 bg-gradient-to-br from-green-900 to-green-800"></div>
+              )}
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10"></div>
+
+              {/* Play button */}
+              <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-14 h-14 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <FaPlay className="w-5 h-5 text-green-800 ml-0.5" />
+              </div>
+
+              <div class="relative z-10 p-6 md:p-8 text-white">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-[9px] font-semibold bg-green-600 text-white px-2.5 py-0.5 rounded-full uppercase tracking-wide">
+                    Récent
+                  </span>
+                  <span class="text-[11px] text-white/50">{featured.date}</span>
+                </div>
+                <h2 class="text-lg md:text-xl font-bold mb-2 leading-snug line-clamp-2">
+                  {featured.title}
+                </h2>
+                {featured.description && (
+                  <p class="text-sm text-white/60 leading-relaxed line-clamp-2 max-w-2xl">
+                    {featured.description}
+                  </p>
+                )}
+              </div>
+            </a>
+          )}
+
+          {/* Grille */}
+          {otherVideos.length > 0 && (
+            <>
+              <h3 class="text-sm font-semibold text-gray-900 mb-4">
+                Toutes les vidéos
+              </h3>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="videos-grid">
+                {otherVideos.map((video: any, index: number) => (
+                  <a
+                    href={`/videos/${video.slug}`}
+                    class:list={[
+                      "video-card block rounded-2xl border border-gray-100 hover:border-green-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group",
+                      { "hidden": index >= 6 }
+                    ]}
+                    data-index={index}
+                  >
+                    {/* Thumbnail */}
+                    <div class="relative h-44 overflow-hidden bg-gray-100">
+                      {video.image ? (
+                        <img
+                          src={video.image}
+                          alt={video.title}
+                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div class="w-full h-full bg-gradient-to-br from-green-800 to-green-700"></div>
+                      )}
+                      <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+
+                      {/* Play */}
+                      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all">
+                        <FaPlay className="w-3.5 h-3.5 text-green-800 ml-0.5" />
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div class="p-4">
+                      <span class="text-[10px] text-gray-400 mb-1 block">{video.date}</span>
+                      <h3 class="text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-green-800 transition-colors">
+                        {video.title}
+                      </h3>
+                    </div>
+                  </a>
+                ))}
+              </div>
+
+              {/* Voir plus */}
+              {otherVideos.length > 6 && (
+                <div class="mt-8 flex flex-col items-center gap-3">
+                  <p class="text-xs text-gray-400">
+                    <span id="videos-shown">{Math.min(6, otherVideos.length)}</span> sur {otherVideos.length} vidéos
+                  </p>
+                  <button
+                    id="load-more-videos"
+                    class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold border border-green-600 text-green-600 hover:bg-green-600 hover:text-white rounded-lg transition-colors duration-300"
+                  >
+                    Voir plus de vidéos
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
+    </div>
+  </section>
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('load-more-videos');
+    const counter = document.getElementById('videos-shown');
+    const cards = document.querySelectorAll('.video-card');
+    const step = 6;
+    let visible = Math.min(step, cards.length);
+
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      const next = Math.min(visible + step, cards.length);
+      for (let i = visible; i < next; i++) {
+        cards[i].classList.remove('hidden');
+      }
+      visible = next;
+      if (counter) counter.textContent = String(visible);
+      if (visible >= cards.length) btn.style.display = 'none';
+    });
+  });
+</script>

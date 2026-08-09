@@ -1,0 +1,50 @@
+---
+import { Image } from "astro:assets";
+
+interface Props {
+  image: ImageMetadata;
+  alt?: string;
+  label?: string;
+  title: string;
+  description?: string;
+}
+
+const {
+  image,
+  alt = "",
+  label,
+  title,
+  description,
+} = Astro.props;
+---
+
+<section class="bg-white/90 backdrop-blur relative isolate overflow-hidden h-[60vh] min-h-[400px]">
+  <div class="absolute inset-0">
+    <Image
+      src={image}
+      alt={alt}
+      class="h-full w-full object-cover"
+      width={1920}
+      height={960}
+      loading="eager"
+      decoding="async"
+    />
+  </div>
+  <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/40"></div>
+
+  <div class="relative z-10 flex h-full max-w-4xl flex-col justify-center gap-4 px-6 text-white lg:px-8">
+    {label && (
+      <p class="text-xs uppercase tracking-widest text-green-300 font-medium">
+        {label}
+      </p>
+    )}
+    <h1 class="text-3xl font-bold md:text-4xl lg:text-5xl">
+      {title}
+    </h1>
+    {description && (
+      <p class="max-w-3xl text-base text-slate-200 sm:text-lg leading-relaxed">
+        {description}
+      </p>
+    )}
+  </div>
+</section>

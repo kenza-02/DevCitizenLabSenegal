@@ -1,6 +1,6 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
-import { Image } from 'astro:assets';
+import PageBanner from '~/components/widgets/PageBanner.astro';
 import baniereImage from '../assets/images/baniere.png';
 
 const metadata = {
@@ -9,7 +9,6 @@ const metadata = {
   ignoreTitleTemplate: true,
 };
 
-// Questions par catégorie
 const questionsGenerales = [
   {
     question: "Qu'est-ce que CitizenLab Sénégal ?",
@@ -17,7 +16,7 @@ const questionsGenerales = [
   },
   {
     question: "Quels sont les objectifs du projet ?",
-    reponse: "Le projet vise à promouvoir la participation citoyenne et l'engagement civique des jeunes, essentiels pour une démocratie robuste. Nous visons à former plus de 150 jeunes, produire plus de 130 contenus de qualité, et sensibiliser plus de 10 millions de personnes aux enjeux de la participation citoyenne au Sénégal."
+    reponse: "Le projet vise à promouvoir la participation citoyenne et l'engagement civique des jeunes, essentiels pour une démocratie robuste. Nous visons à former plus de 150 jeunes, et sensibiliser plus de 10 millions de personnes aux enjeux de la participation citoyenne au Sénégal."
   },
   {
     question: "Qui peut rejoindre la communauté ?",
@@ -51,7 +50,7 @@ const questionsProjets = [
   },
   {
     question: "Où trouver les rapports publiés ?",
-    reponse: "Tous nos rapports publics sont disponibles dans la section Ressources de notre site web. Vous y trouverez nos rapports d'activités, nos études et nos publications sur la participation citoyenne au Sénégal."
+    reponse: "Tous nos rapports publics sont disponibles dans la section Rapports de notre site web. Vous y trouverez nos rapports d'activités, nos études et nos publications sur la participation citoyenne au Sénégal."
   }
 ];
 
@@ -66,209 +65,97 @@ const questionsPartenariats = [
   },
   {
     question: "Comment contacter l'équipe de coordination ?",
-    reponse: "Vous pouvez contacter notre équipe de coordination par email à contact@citizenlab-senegal.org, par téléphone au +221 XX XXX XX XX ou via le formulaire de contact ci-dessous. Nous vous répondrons dans les plus brefs délais."
+    reponse: "Vous pouvez contacter notre équipe de coordination par email à aclsenegal@africtivistes.org, par téléphone au +221 78 018 01 05 ou via le formulaire de contact. Nous vous répondrons dans les plus brefs délais."
   }
+];
+
+const faqCategories = [
+  { titre: "Général", questions: questionsGenerales },
+  { titre: "Formations", questions: questionsFormations },
+  { titre: "Projets & Activités", questions: questionsProjets },
+  { titre: "Partenariats", questions: questionsPartenariats },
 ];
 ---
 
 <Layout metadata={metadata}>
-  <!-- Bannière FAQ avec image de fond -->
-  <div class="relative">
-    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-black/60 z-10"></div>
-    <div class="absolute inset-0">
-      <Image 
-        src={baniereImage}
-        alt="CitizenLab Sénégal FAQ" 
-        width={1920} 
-        height={800} 
-        class="w-full h-full object-cover"
-      />
+  <!-- Banner -->
+  <PageBanner
+    image={baniereImage}
+    alt="FAQ CitizenLab Sénégal"
+    label="FAQ"
+    title="Questions Fréquentes"
+    description="Vous trouverez ici les réponses aux questions les plus posées sur CitizenLab Sénégal, nos formations et nos activités."
+  />
+
+  <!-- FAQ -->
+  <section class="bg-white/80 backdrop-blur-sm py-16">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {faqCategories.map((cat, catIndex) => (
+          <div class="rounded-2xl border border-gray-100 overflow-hidden">
+            <!-- Header catégorie -->
+            <div class="bg-green-700 py-3 px-5">
+              <h3 class="text-sm font-semibold text-white">{cat.titre}</h3>
+            </div>
+
+            <!-- Questions -->
+            <div class="bg-white">
+              {cat.questions.map((item, qIndex) => (
+                <div
+                  class={`faq-item ${qIndex < cat.questions.length - 1 ? "border-b border-gray-100" : ""}`}
+                  data-cat={catIndex}
+                  data-q={qIndex}
+                >
+                  <button class="faq-btn w-full flex items-center gap-3 px-5 py-3.5 text-left hover:bg-green-50/50 transition-colors cursor-pointer">
+                    <span class="faq-arrow text-green-600 text-sm shrink-0 transition-transform duration-200">➔</span>
+                    <span class="text-sm font-medium text-gray-800">{item.question}</span>
+                  </button>
+                  <div class="faq-answer hidden px-5 pb-4 pl-10">
+                    <p class="text-sm text-gray-500 leading-relaxed">{item.reponse}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
     </div>
-    <div class="relative z-20 py-32 md:py-40 lg:py-48 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center text-white">
-      <div class="text-center">
-        <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold mb-4">Questions Fréquentes</h1>
-        <div class="h-1 w-[500px] max-w-full bg-white mx-auto mb-8"></div>
-      </div>
-      <p class="text-xl md:text-2xl lg:text-3xl max-w-4xl mx-auto">
-        Vous trouverez ici les réponses aux questions les plus posées sur CitizenLab Sénégal, nos formations et nos activités.
-      </p>
-    </div>
-  </div>
-
-  <!-- Section FAQ -->
-  <div class="bg-white py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-    <!-- Titre FAQ -->
-    <h2 class="text-5xl font-bold text-center mb-10 text-gray-900">FAQ</h2>
-    
-
-    <!-- Grille de catégories FAQ -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-      <!-- Catégorie Général -->
-      <div>
-        <div class="bg-green-600 py-4 px-6 text-center">
-          <h3 class="text-2xl font-bold text-white">Général</h3>
-        </div>
-        <div class="bg-gray-100">
-          {questionsGenerales.map((item, index) => (
-            <div class="faq-item" data-category="general" data-index={index}>
-              <div class="faq-question border-b border-gray-200 py-4 px-6 hover:bg-gray-50">
-                <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                  <span class="faq-arrow text-green-600 mr-3 text-2xl">➔</span> 
-                  {item.question}
-                </h4>
-                <div class="faq-answer bg-white mt-3 pl-8 pr-2">
-                  <p class="text-gray-600">{item.reponse}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <!-- Catégorie Formations -->
-      <div>
-        <div class="bg-red-600 py-4 px-6 text-center">
-          <h3 class="text-2xl font-bold text-white">Formations</h3>
-        </div>
-        <div class="bg-gray-100">
-          {questionsFormations.map((item, index) => (
-            <div class="faq-item" data-category="formations" data-index={index}>
-              <div class="faq-question border-b border-gray-200 py-4 px-6 hover:bg-gray-50">
-                <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                  <span class="faq-arrow text-red-600 mr-3 text-2xl">➔</span> 
-                  {item.question}
-                </h4>
-                <div class="faq-answer bg-white mt-3 pl-8 pr-2">
-                  <p class="text-gray-600">{item.reponse}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <!-- Catégorie Projets & Activités -->
-      <div>
-        <div class="bg-yellow-500 py-4 px-6 text-center">
-          <h3 class="text-2xl font-bold text-white">Projets & Activités</h3>
-        </div>
-        <div class="bg-gray-100">
-          {questionsProjets.map((item, index) => (
-            <div class="faq-item" data-category="projets" data-index={index}>
-              <div class="faq-question border-b border-gray-200 py-4 px-6 hover:bg-gray-50">
-                <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                  <span class="faq-arrow text-yellow-500 mr-3 text-2xl">➔</span> 
-                  {item.question}
-                </h4>
-                <div class="faq-answer bg-white mt-3 pl-8 pr-2">
-                  <p class="text-gray-600">{item.reponse}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <!-- Catégorie Partenariats -->
-      <div>
-        <div class="bg-black py-4 px-6 text-center">
-          <h3 class="text-2xl font-bold text-white">Partenariats</h3>
-        </div>
-        <div class="bg-gray-100">
-          {questionsPartenariats.map((item, index) => (
-            <div class="faq-item" data-category="partenariats" data-index={index}>
-              <div class="faq-question border-b border-gray-200 py-4 px-6 hover:bg-gray-50">
-                <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                  <span class="faq-arrow text-black mr-3 text-2xl">➔</span> 
-                  {item.question}
-                </h4>
-                <div class="faq-answer bg-white mt-3 pl-8 pr-2">
-                  <p class="text-gray-600">{item.reponse}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-
-  </div>
+  </section>
 </Layout>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser toutes les réponses comme cachées
-    const faqAnswers = document.querySelectorAll('.faq-answer');
-    faqAnswers.forEach(answer => {
-      answer.style.display = 'none';
-    });
-    
-    // Gestion du survol pour afficher/masquer les réponses
-    const faqQuestions = document.querySelectorAll('.faq-question');
-    
-    faqQuestions.forEach(question => {
-      // Afficher la réponse au survol
-      question.addEventListener('mouseenter', function() {
-        const answer = this.querySelector('.faq-answer');
-        answer.style.display = 'block';
-        
-        // Rotation de la flèche
-        const arrow = this.querySelector('.faq-arrow');
-        arrow.style.transform = 'rotate(90deg)';
-      });
-      
-      // Masquer la réponse quand la souris quitte
-      question.addEventListener('mouseleave', function() {
-        const answer = this.querySelector('.faq-answer');
-        answer.style.display = 'none';
-        
-        // Rotation de la flèche
-        const arrow = this.querySelector('.faq-arrow');
-        arrow.style.transform = 'rotate(0deg)';
-      });
-      
-      // Pour les appareils mobiles (tactiles), ajouter un événement de clic
-      question.addEventListener('click', function() {
-        // Vérifier si nous sommes sur un appareil tactile
-        if (window.matchMedia('(max-width: 768px)').matches) {
-          const answer = this.querySelector('.faq-answer');
-          const arrow = this.querySelector('.faq-arrow');
-          
-          if (answer.style.display === 'none') {
-            answer.style.display = 'block';
-            arrow.style.transform = 'rotate(90deg)';
-          } else {
-            answer.style.display = 'none';
-            arrow.style.transform = 'rotate(0deg)';
+  document.addEventListener('DOMContentLoaded', () => {
+    const items = document.querySelectorAll('.faq-item');
+
+    items.forEach((item) => {
+      const btn = item.querySelector('.faq-btn');
+      const answer = item.querySelector('.faq-answer');
+      const arrow = item.querySelector<HTMLElement>('.faq-arrow');
+
+      btn?.addEventListener('click', () => {
+        const isOpen = !answer?.classList.contains('hidden');
+
+        // Fermer tous les autres dans la même catégorie
+        const cat = item.getAttribute('data-cat');
+        document.querySelectorAll(`.faq-item[data-cat="${cat}"]`).forEach((other) => {
+          if (other !== item) {
+            other.querySelector('.faq-answer')?.classList.add('hidden');
+            const otherArrow = other.querySelector<HTMLElement>('.faq-arrow');
+            if (otherArrow) otherArrow.style.transform = 'rotate(0deg)';
           }
+        });
+
+        // Toggle l'item cliqué
+        if (isOpen) {
+          answer?.classList.add('hidden');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+        } else {
+          answer?.classList.remove('hidden');
+          if (arrow) arrow.style.transform = 'rotate(90deg)';
         }
       });
     });
-    
   });
 </script>
-
-<style>
-  .faq-arrow {
-    transition: transform 0.3s ease;
-  }
-  
-  .faq-answer {
-    transition: opacity 0.3s ease;
-  }
-  
-  .faq-item {
-    border-bottom: 1px solid #e5e7eb;
-  }
-  
-  .faq-item:last-child {
-    border-bottom: none;
-  }
-  
-  /* Styles pour les appareils mobiles */
-  @media (max-width: 768px) {
-    .faq-question {
-      cursor: pointer;
-    }
-  }
-</style>
